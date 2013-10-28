@@ -12,4 +12,8 @@ import com.pl.msarelo.wi.hangman.server.domain.Player;
  * @author marcin
  */
 public class PlayerService extends Service<Player> {
+
+    public Player createPlayer(String name) {
+	return dao.save(new Player(name));
+    }
 }

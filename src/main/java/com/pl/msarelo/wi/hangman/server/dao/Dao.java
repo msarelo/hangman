@@ -7,34 +7,61 @@ import javax.persistence.Persistence;
 
 public class Dao {
 
+    private EntityManagerFactory entityManagerFactory;
     protected Class persistedClass;
-    private final EntityManager entityManager;
+    private EntityManager entityManager;
 
     public Dao(Class persistedClass) {
-	EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("hangman");
+	entityManagerFactory = Persistence.createEntityManagerFactory("hangman"); // or hangman-mysql
 	entityManager = entityManagerFactory.createEntityManager();
-
+	this.persistedClass = persistedClass;
     }
 
-    public Object findById(int id) {
+    public Object findById(Long id) {
+	beginTransaction();
 	Object object = (Object) entityManager.find(persistedClass, id);
+	commitAndCloseTransaction();
 	return object;
     }
 
-    public void save(Object object) {
+    public <T> T save(T object) {
+	beginTransaction();
 	entityManager.persist(object);
+	entityManager.flush();
+	commitAndCloseTransaction();
+	return object;
     }
 
-    public void saveOrUpdate(Object object) {
+    public <T> T saveOrUpdate(T object) {
+	beginTransaction();
 	entityManager.merge(object);
+	commitAndCloseTransaction();
+	return object;
     }
 
     public void delete(Object object) {
+	beginTransaction();
 	entityManager.remove(object);
+	commitAndCloseTransaction();
     }
 
     public List findAll() {
-	return entityManager.createNamedQuery("SELECT o FROM " + persistedClass.getSimpleName() + " o").getResultList();
+	beginTransaction();
+	List result = entityManager.createNamedQuery(persistedClass.getSimpleName() + ".findAll", persistedClass).getResultList();
+	commitAndCloseTransaction();
+	return result;
+    }
+
+    private void beginTransaction() {
+
+	entityManager = entityManagerFactory.createEntityManager();
+
+	entityManager.getTransaction().begin();
+    }
+
+    private void commitAndCloseTransaction() {
+	entityManager.getTransaction().commit();
+	entityManager.close();
     }
 
 }

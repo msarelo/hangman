@@ -6,6 +6,7 @@
 package com.pl.msarelo.wi.hangman.server.service;
 
 import com.pl.msarelo.wi.hangman.server.domain.Game;
+import com.pl.msarelo.wi.hangman.server.domain.Player;
 
 /**
  *
@@ -13,8 +14,16 @@ import com.pl.msarelo.wi.hangman.server.domain.Game;
  */
 public class GameService extends Service<Game> {
 
-    public void createGame(String word) {
-	Game game = new Game(word);
+    public void createGame(Game.Category category, String word) {
+	Game game = new Game(category, word);
 	dao.save(game);
+    }
+
+    public Game addPlayerToGame(Player player, Game game) {
+
+	game.getGameResult().getPlayerCountOfAttempt().put(player, 0);
+	game.getGameResult().getPlayerCountOfFailure().put(player, 0);
+	return dao.saveOrUpdate(game);
+
     }
 }

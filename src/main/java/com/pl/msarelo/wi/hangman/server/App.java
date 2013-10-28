@@ -10,19 +10,16 @@ public class App {
     public static void main(String[] args) {
 
 	GameService gameService = new GameService();
-	gameService.createGame("dupa");
+	gameService.createGame(Game.Category.BATHROOM, "zlew");
 
 	List<Game> games = gameService.getAll();
-	GameManager gameManager = new GameManager(games);
+	GameManager gameManager = new GameManager();
 
-//		String url = "http://192.168.2.110:8080/smartphone"; //dom
-//		String url = "http://192.168.2.142:8080/smartphone"; // praca
-	String url = "http://localhost:8080/smartphone";
+//		String url = "http://192.168.2.142:8080/hangman"; // praca
+	String url = "http://localhost:8080/hangman";
 
 	Endpoint.publish(url, gameManager);
 	System.out.println(games.size());
-//                    System.out.println(smartphoneManager.searchByIsBuyNow().size());
-//                    System.out.println(smartphoneManager.searchByAttr("16").size());
 	for (Game game : games) {
 	    System.out.println(game.getId());
 	}

@@ -5,9 +5,27 @@
  */
 package com.pl.msarelo.wi.hangman.server.domain;
 
+import java.util.List;
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  *
  * @author marcin
  */
+@XmlRootElement(name = "GameList")
 public class GameList {
+
+    private List<Game> gameList;
+
+    public GameList() {
+    }
+
+    public List<Game> getGameList() {
+	return gameList;
+    }
+
+    public void setGameList(List<Game> gameList) {
+	this.gameList = gameList;
+    }
+
 }

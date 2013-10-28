@@ -5,23 +5,33 @@
  */
 package com.pl.msarelo.wi.hangman.server.domain;
 
+import java.util.List;
+import javax.persistence.Entity;
+import javax.persistence.ManyToMany;
+import javax.xml.bind.annotation.XmlType;
+
 /**
  *
  * @author Marcin
  */
+@Entity
+@XmlType(name = "Player")
 public class Player extends AbstractEntity {
 
     private String name;
-    private int countOfAttempt;
-    private int counOfFailure;
+//    private String login;
+//    private String password;
+
+    @ManyToMany
+    private List<Game> games;
 
     public Player() {
     }
 
     public Player(String name) {
 	this.name = name;
-	this.countOfAttempt = 0;
-	this.counOfFailure = 0;
+//	this.countOfAttempt = 0;
+//	this.counOfFailure = 0;
     }
 
     public String getName() {
@@ -32,20 +42,12 @@ public class Player extends AbstractEntity {
 	this.name = name;
     }
 
-    public int getCountOfAttempt() {
-	return countOfAttempt;
+    public List<Game> getGames() {
+	return games;
     }
 
-    public void setCountOfAttempt(int countOfAttempt) {
-	this.countOfAttempt = countOfAttempt;
-    }
-
-    public int getCounOfFailure() {
-	return counOfFailure;
-    }
-
-    public void setCounOfFailure(int counOfFailure) {
-	this.counOfFailure = counOfFailure;
+    public void setGames(List<Game> games) {
+	this.games = games;
     }
 
 }

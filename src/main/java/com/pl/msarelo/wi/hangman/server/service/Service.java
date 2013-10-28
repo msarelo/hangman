@@ -20,8 +20,11 @@ public class Service<T> {
 
     public Service() {
 	this.entityClass = (Class<T>) TypeResolver.resolveArguments(getClass(), Service.class)[0];
-//		resolveArguments(getClass(), Service.class)[0];;
 	dao = new Dao(entityClass);
+    }
+
+    public T findById(Long id) {
+	return (T) dao.findById(id);
     }
 
     public List<T> getAll() {

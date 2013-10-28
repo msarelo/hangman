@@ -7,28 +7,52 @@ package com.pl.msarelo.wi.hangman.server.domain;
 
 import java.util.List;
 import javax.persistence.CascadeType;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.OneToOne;
 import javax.xml.bind.annotation.XmlType;
 
 /**
  *
  * @author Marcin
  */
-@XmlType(name = "game")
+@XmlType(name = "Game")
+@Entity
+@NamedQueries({
+    @NamedQuery(
+	    name = "Game.findAll",
+	    query = "SELECT g FROM Game g"
+	    )})
 public class Game extends AbstractEntity {
 
     private String word;
     private Status status;
-    @OneToMany(mappedBy = "game", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<Player> players;
+    private Category category;
+    @ElementCollection
+    private List<Character> usedChars;
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private GameResult gameResult;
+//    @ManyToMany
+    //    private List<Player> players;
+    //    @ElementCollection
+    //    @CollectionTable(name = "<name_of_join_table>")
+    //    @MapKeyColumn(name = "<name_of_map_key_in_table>")
+    //    @OneToMany(fetch= FetchType.LAZY, mappedBy = "page", cascade = CascadeType.ALL, orphanRemoval=true)
+    //	@MapKey(name="placeholder")
+    //	private Map<Integer, PageElement> pageElements;
+    //    private GameStatus playersStatus;
 
     public Game() {
     }
 
-    public Game(String word) {
+    public Game(Category category, String word) {
 	this.word = word;
+	this.category = category;
 	this.status = Game.Status.PREPARAE;
+	this.gameResult = new GameResult();
     }
 
     public String getWord() {
@@ -47,16 +71,72 @@ public class Game extends AbstractEntity {
 	this.status = status;
     }
 
-    public List<Player> getPlayers() {
-	return players;
+    public Category getCategory() {
+	return category;
     }
 
-    public void setPlayers(List<Player> players) {
-	this.players = players;
+    public void setCategory(Category category) {
+	this.category = category;
     }
 
-    enum Status {
+    public GameResult getGameResult() {
+	return gameResult;
+    }
+
+    public void setGameResult(GameResult gameResult) {
+	this.gameResult = gameResult;
+    }
+
+    public List<Character> getUsedChars() {
+	return usedChars;
+    }
+
+    public void setUsedChars(List<Character> usedChars) {
+	this.usedChars = usedChars;
+    }
+
+    public void addChar(char usedChar) {
+	this.usedChars.add(usedChar);
+    }
+
+    public String nextFailureAttempt(Player player) {
+	String result = null;
+	Integer count = getGameResult().getPlayerCountOfAttempt().get(player);
+	count++;
+	getGameResult().getPlayerCountOfAttempt().put(player, count);
+
+	count = getGameResult().getPlayerCountOfFailure().get(player);
+	count++;
+	if (count >= getWord().length()) {
+	    result = "Player lose";
+	} else {
+	    getGameResult().getPlayerCountOfFailure().put(player, count);
+	    result = count.toString();
+	}
+	return result;
+    }
+
+    public void nextAttempt(Player player) {
+	Integer count = getGameResult().getPlayerCountOfAttempt().get(player);
+	count++;
+	getGameResult().getPlayerCountOfAttempt().put(player, count);
+
+    }
+
+//    public List<Player> getPlayers() {
+//	return players;
+//    }
+//
+//    public void setPlayers(List<Player> players) {
+//	this.players = players;
+//    }
+    public enum Status {
 
 	ONGOING, ENDED, PREPARAE
+    }
+
+    public enum Category {
+
+	BABY_ROOM, BATHROOM, BEDROOM, CAR_PARTS, CLOTHES, CONSTRUCTION_SITE, COOKING_INSTRUCTIONS, COUNTRIES, DINING_ROOM, FAMILY_MEMBERS, FRUIT_VEGETABLES, JOBS, KITCHEN, LIVING_ROOM, OFFICE_EQUIPMENT, PARTS_OF_THE_BODY, UNIVERSE_SPACE, WILD_ANIMALS_PETS, WORKSHOP_TOOLS
     }
 }
