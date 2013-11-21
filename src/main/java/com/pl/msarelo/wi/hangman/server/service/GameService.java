@@ -15,22 +15,33 @@ import com.pl.msarelo.wi.hangman.server.domain.Player;
 public class GameService extends Service<Game> {
 
     public void createGame(Game.Category category, String word) {
-	Game game = new Game(category, word);
-	dao.save(game);
+        Game game = new Game(category, word);
+        dao.save(game);
     }
 
     public Game addPlayerToGame(Player player, Game game) {
 
-	game.getGameResult().getPlayerCountOfAttempt().put(player.getId(), 0);
-	game.getGameResult().getPlayerCountOfFailure().put(player.getId(), 0);
-        
+        if (game.getGameResult().getPlayerCountOfAttempt().containsKey(player.getId())) {
+            game.getGameResult().getPlayerCountOfAttempt().remove(player.getId());
+
+        }
+        game.getGameResult().getPlayerCountOfAttempt().put(player.getId(), 0);
+
+        if (game.getGameResult().getPlayerCountOfFailure().containsKey(player.getId())) {
+            game.getGameResult().getPlayerCountOfFailure().remove(player.getId());
+        }
+        game.getGameResult().getPlayerCountOfFailure().put(player.getId(), 0);
+
         game = dao.saveOrUpdate(game);
-       
-        PlayerService playerService =new PlayerService();
+
+        PlayerService playerService = new PlayerService();
+        if (player.getGames().contains(game)) {
+            player.getGames().remove(game);
+        }
         player.getGames().add(game);
         playerService.dao.saveOrUpdate(player);
-        
-	return game;
+
+        return game;
 
     }
 }
