@@ -13,6 +13,7 @@ import javax.persistence.FetchType;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 /**
@@ -23,10 +24,12 @@ import javax.xml.bind.annotation.XmlType;
 @Entity
 @NamedQueries({
     @NamedQuery(
-	    name = "Game.findAll",
-	    query = "SELECT g FROM Game g"
-	    )})
+            name = "Game.findAll",
+            query = "SELECT g FROM Game g"
+    )})
 public class Game extends AbstractEntity {
+
+    private static final int MAX_ATTEMPTS = 9;
 
     private String word;
     private Status status;
@@ -35,91 +38,86 @@ public class Game extends AbstractEntity {
     private List<Character> usedChars;
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private GameResult gameResult;
-//    @ManyToMany
-    //    private List<Player> players;
-    //    @ElementCollection
-    //    @CollectionTable(name = "<name_of_join_table>")
-    //    @MapKeyColumn(name = "<name_of_map_key_in_table>")
-    //    @OneToMany(fetch= FetchType.LAZY, mappedBy = "page", cascade = CascadeType.ALL, orphanRemoval=true)
-    //	@MapKey(name="placeholder")
-    //	private Map<Integer, PageElement> pageElements;
-    //    private GameStatus playersStatus;
-
     public Game() {
     }
 
     public Game(Category category, String word) {
-	this.word = word;
-	this.category = category;
-	this.status = Game.Status.PREPARAE;
-	this.gameResult = new GameResult();
+        this.word = word;
+        this.category = category;
+        this.status = Game.Status.PREPARAE;
+        this.gameResult = new GameResult();
     }
 
     public String getWord() {
-	return word;
+        return word;
     }
 
     public void setWord(String word) {
-	this.word = word;
+        this.word = word;
     }
 
     public Status getStatus() {
-	return status;
+        return status;
     }
 
     public void setStatus(Status status) {
-	this.status = status;
+        this.status = status;
     }
 
     public Category getCategory() {
-	return category;
+        return category;
     }
 
     public void setCategory(Category category) {
-	this.category = category;
+        this.category = category;
     }
 
     public GameResult getGameResult() {
-	return gameResult;
+        return gameResult;
     }
 
     public void setGameResult(GameResult gameResult) {
-	this.gameResult = gameResult;
+        this.gameResult = gameResult;
     }
 
+    @XmlTransient
     public List<Character> getUsedChars() {
-	return usedChars;
+        return usedChars;
     }
 
     public void setUsedChars(List<Character> usedChars) {
-	this.usedChars = usedChars;
+        this.usedChars = usedChars;
     }
 
     public void addChar(char usedChar) {
-	this.usedChars.add(usedChar);
+        this.usedChars.add(usedChar);
     }
 
     public String nextFailureAttempt(Player player) {
-	String result = null;
-	Integer count = getGameResult().getPlayerCountOfAttempt().get(player);
-	count++;
-	getGameResult().getPlayerCountOfAttempt().put(player, count);
+        String result = null;
 
-	count = getGameResult().getPlayerCountOfFailure().get(player);
-	count++;
-	if (count >= getWord().length()) {
-	    result = "Player lose";
-	} else {
-	    getGameResult().getPlayerCountOfFailure().put(player, count);
-	    result = count.toString();
-	}
-	return result;
+        nextAttempt(player);
+
+        Integer count = getGameResult().getPlayerCountOfFailure().get(player);
+
+        if (count >= MAX_ATTEMPTS) {
+            result = "Player lose";
+        } else {
+            count++;
+            getGameResult().getPlayerCountOfFailure().put(player, count);
+            result = count.toString();
+        }
+        return result;
     }
 
-    public void nextAttempt(Player player) {
-	Integer count = getGameResult().getPlayerCountOfAttempt().get(player);
-	count++;
-	getGameResult().getPlayerCountOfAttempt().put(player, count);
+    public String nextAttempt(Player player) {
+        String result = null;
+        Integer count = getGameResult().getPlayerCountOfAttempt().get(player);
+        count++;
+        getGameResult().getPlayerCountOfAttempt().put(player, count);
+        result = count.toString();
+
+        return result;
 
     }
 
@@ -132,11 +130,11 @@ public class Game extends AbstractEntity {
 //    }
     public enum Status {
 
-	ONGOING, ENDED, PREPARAE
+        ONGOING, ENDED, PREPARAE
     }
 
     public enum Category {
 
-	BABY_ROOM, BATHROOM, BEDROOM, CAR_PARTS, CLOTHES, CONSTRUCTION_SITE, COOKING_INSTRUCTIONS, COUNTRIES, DINING_ROOM, FAMILY_MEMBERS, FRUIT_VEGETABLES, JOBS, KITCHEN, LIVING_ROOM, OFFICE_EQUIPMENT, PARTS_OF_THE_BODY, UNIVERSE_SPACE, WILD_ANIMALS_PETS, WORKSHOP_TOOLS
+        BABY_ROOM, BATHROOM, BEDROOM, CAR_PARTS, CLOTHES, CONSTRUCTION_SITE, COOKING_INSTRUCTIONS, COUNTRIES, DINING_ROOM, FAMILY_MEMBERS, FRUIT_VEGETABLES, JOBS, KITCHEN, LIVING_ROOM, OFFICE_EQUIPMENT, PARTS_OF_THE_BODY, UNIVERSE_SPACE, WILD_ANIMALS_PETS, WORKSHOP_TOOLS
     }
 }

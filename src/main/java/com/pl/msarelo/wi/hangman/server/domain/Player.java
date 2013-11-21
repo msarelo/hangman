@@ -8,6 +8,8 @@ package com.pl.msarelo.wi.hangman.server.domain;
 import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.xml.bind.annotation.XmlType;
 
 /**
@@ -16,11 +18,14 @@ import javax.xml.bind.annotation.XmlType;
  */
 @Entity
 @XmlType(name = "Player")
+@NamedQueries({
+    @NamedQuery(
+	    name = "Player.findAll",
+	    query = "SELECT f FROM Player f"
+	    )})
 public class Player extends AbstractEntity {
 
     private String name;
-//    private String login;
-//    private String password;
 
     @ManyToMany
     private List<Game> games;
@@ -30,8 +35,6 @@ public class Player extends AbstractEntity {
 
     public Player(String name) {
 	this.name = name;
-//	this.countOfAttempt = 0;
-//	this.counOfFailure = 0;
     }
 
     public String getName() {

@@ -41,6 +41,12 @@ public class GameManager {
 	System.out.println("getGameList");
 	return gameService.getAll();
     }
+    
+    @WebMethod
+    public List<Player> getPlayerList() {
+	System.out.println("getPlayerList");
+	return playerService.getAll();
+    }
 
     @WebMethod
     public String createGame(@WebParam(name = "category") Game.Category category, @WebParam(name = "word") String word) {
@@ -57,13 +63,13 @@ public class GameManager {
 
     @WebMethod
     public Game addPlayerToGame(@WebParam(name = "gameId") Long gameId, @WebParam(name = "playerId") Long playerId) {
-	System.out.println("addPlayerToGame with params: " + gameId + " " + playerId);
+	System.out.println("addPlayerToGame with params: { gameId: " + gameId + " playerId: " + playerId+" }");
 	return gameService.addPlayerToGame(playerService.findById(playerId), gameService.findById(gameId));
     }
 
     @WebMethod
     public Game checkLetter(@WebParam(name = "gameId") Long gameId, @WebParam(name = "playerId") Long playerId, @WebParam(name = "letter") String letter) {
-	System.out.println("checkLetter with params: " + gameId + " " + playerId + " " + letter);
+	System.out.println("checkLetter with params: { gameId: " + gameId + " playerId: " + playerId + " letter: " + letter + " }");
 
 	return gameplayService.checkLetter(gameId, playerId, new Character(letter.toCharArray()[0]));
     }

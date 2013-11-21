@@ -23,21 +23,7 @@ public class GameResult extends AbstractEntity {
 
     @OneToOne
     private Game game;
-//    @ElementCollection
-//    @CollectionTable(name = "player")
-//    @MapKeyColumn(name = "PlayerStatus")
-//    @ElementCollection
-//    @CollectionTable(name = "player")
-//    @MapKeyColumn(name = "id")
-//    @Column(name = "PlayerStatusId")
-//    private Map<UserType, Boolean> userType = new HashMap<>();
 
-//    @ElementCollection
-//    @CollectionTable(name = "Player")
-//    @MapKeyColumn(name = "id")
-//    @Column(name = "PlayerStatusId")
-//    @OneToMany
-//    @MapKeyColumn(name = "player_id")
     @ElementCollection
     @CollectionTable(name = "Player_Count_Of_Attempt")
     @MapKeyColumn(name = "Player_id")
@@ -50,8 +36,7 @@ public class GameResult extends AbstractEntity {
     @Column(name = "fail")
     private Map<Player, Integer> playerCountOfFailure = new HashMap<Player, Integer>();
 
-//    private int countOfAttempt;
-//    private int counOfFailure;
+
     public Game getGame() {
 	return game;
     }
