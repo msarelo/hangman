@@ -21,9 +21,16 @@ public class GameService extends Service<Game> {
 
     public Game addPlayerToGame(Player player, Game game) {
 
-	game.getGameResult().getPlayerCountOfAttempt().put(player, 0);
-	game.getGameResult().getPlayerCountOfFailure().put(player, 0);
-	return dao.saveOrUpdate(game);
+	game.getGameResult().getPlayerCountOfAttempt().put(player.getId(), 0);
+	game.getGameResult().getPlayerCountOfFailure().put(player.getId(), 0);
+        
+        game = dao.saveOrUpdate(game);
+       
+        PlayerService playerService =new PlayerService();
+        player.getGames().add(game);
+        playerService.dao.saveOrUpdate(player);
+        
+	return game;
 
     }
 }

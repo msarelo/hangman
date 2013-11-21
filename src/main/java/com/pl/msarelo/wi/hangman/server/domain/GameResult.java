@@ -28,13 +28,13 @@ public class GameResult extends AbstractEntity {
     @CollectionTable(name = "Player_Count_Of_Attempt")
     @MapKeyColumn(name = "Player_id")
     @Column(name = "count")
-    private Map<Player, Integer> playerCountOfAttempt = new HashMap<Player, Integer>();
+    private Map<Long, Integer> playerCountOfAttempt = new HashMap<Long, Integer>();
 
     @ElementCollection
     @CollectionTable(name = "Player_Count_Of_fail")
     @MapKeyColumn(name = "Player_id")
     @Column(name = "fail")
-    private Map<Player, Integer> playerCountOfFailure = new HashMap<Player, Integer>();
+    private Map<Long, Integer> playerCountOfFailure = new HashMap<Long, Integer>();
 
 
     public Game getGame() {
@@ -45,19 +45,19 @@ public class GameResult extends AbstractEntity {
 	this.game = game;
     }
 
-    public Map<Player, Integer> getPlayerCountOfAttempt() {
+    public Map<Long, Integer> getPlayerCountOfAttempt() {
 	return playerCountOfAttempt;
     }
 
-    public void setPlayerCountOfAttempt(Map<Player, Integer> playerCountOfAttempt) {
+    public void setPlayerCountOfAttempt(Map<Long, Integer> playerCountOfAttempt) {
 	this.playerCountOfAttempt = playerCountOfAttempt;
     }
 
-    public Map<Player, Integer> getPlayerCountOfFailure() {
+    public Map<Long, Integer> getPlayerCountOfFailure() {
 	return playerCountOfFailure;
     }
 
-    public void setPlayerCountOfFailure(Map<Player, Integer> playerCountOfFailure) {
+    public void setPlayerCountOfFailure(Map<Long, Integer> playerCountOfFailure) {
 	this.playerCountOfFailure = playerCountOfFailure;
     }
 

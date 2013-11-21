@@ -104,7 +104,7 @@ public class Game extends AbstractEntity {
             result = "Player lose";
         } else {
             count++;
-            getGameResult().getPlayerCountOfFailure().put(player, count);
+            getGameResult().getPlayerCountOfFailure().put(player.getId(), count);
             result = count.toString();
         }
         return result;
@@ -114,7 +114,7 @@ public class Game extends AbstractEntity {
         String result = null;
         Integer count = getGameResult().getPlayerCountOfAttempt().get(player);
         count++;
-        getGameResult().getPlayerCountOfAttempt().put(player, count);
+        getGameResult().getPlayerCountOfAttempt().put(player.getId(), count);
         result = count.toString();
 
         return result;

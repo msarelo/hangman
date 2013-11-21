@@ -3,7 +3,7 @@
   <persistence-unit name="hangman" transaction-type="RESOURCE_LOCAL">
     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
     <class>com.pl.msarelo.wi.hangman.server.domain.Game</class>
-    
+    <class>com.pl.msarelo.wi.hangman.server.domain.Player</class>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <properties>
       <property name="eclipselink.jdbc.platform" value="org.eclipse.persistence.platform.database.H2Platform"/>
@@ -12,12 +12,10 @@
       <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
       <property name="javax.persistence.jdbc.user" value="root"/>
       <property name="javax.persistence.schema-generation.database.action" value="create"/>
-      <property name="eclipselink.ddl-generation" value="create-tables"/>
     </properties>
   </persistence-unit>
   <persistence-unit name="hangman-mysql" transaction-type="RESOURCE_LOCAL">
     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
-
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/hangman?zeroDateTimeBehavior=convertToNull"/>
       <property name="javax.persistence.jdbc.password" value="root"/>

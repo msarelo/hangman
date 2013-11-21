@@ -10,6 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 /**
@@ -20,9 +21,15 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "Player")
 @NamedQueries({
     @NamedQuery(
-	    name = "Player.findAll",
-	    query = "SELECT f FROM Player f"
-	    )})
+            name = "Player.findAll",
+            query = "SELECT f FROM Player f"
+    ),
+    @NamedQuery(
+            name = "Player.getPlayersAssignedToGame",
+            query = "SELECT p FROM Player p WHERE :game MEMBER OF p.games  "
+    )
+}
+)
 public class Player extends AbstractEntity {
 
     private String name;
@@ -34,23 +41,24 @@ public class Player extends AbstractEntity {
     }
 
     public Player(String name) {
-	this.name = name;
+        this.name = name;
     }
 
     public String getName() {
-	return name;
+        return name;
     }
 
     public void setName(String name) {
-	this.name = name;
+        this.name = name;
     }
 
+    @XmlTransient
     public List<Game> getGames() {
-	return games;
+        return games;
     }
 
     public void setGames(List<Game> games) {
-	this.games = games;
+        this.games = games;
     }
 
 }

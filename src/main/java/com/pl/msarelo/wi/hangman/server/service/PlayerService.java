@@ -5,7 +5,11 @@
  */
 package com.pl.msarelo.wi.hangman.server.service;
 
+import com.pl.msarelo.wi.hangman.server.domain.Game;
 import com.pl.msarelo.wi.hangman.server.domain.Player;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  *
@@ -16,4 +20,12 @@ public class PlayerService extends Service<Player> {
     public Player createPlayer(String name) {
 	return dao.save(new Player(name));
     }
+
+    public List<Player> getPlayersAssignedToGame(Game game) {
+        
+        List<Object> list = new LinkedList<Object>();
+        list.add(game);
+        return dao.executeNamedQuery("getPlayersAssignedToGame", Arrays.asList(Game.class.getSimpleName()),list );
+    }
+       
 }
