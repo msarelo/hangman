@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?><!-- Published by JAX-WS RI at http://jax-ws.dev.java.net. RI's version is JAX-WS RI 2.2.4-b01. --><xs:schema xmlns:tns="http://server.hangman.wi.msarelo.pl.com/" xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0" targetNamespace="http://server.hangman.wi.msarelo.pl.com/">
+
+<xs:element name="addPlayerToGame" type="tns:addPlayerToGame"></xs:element>
+
+<xs:element name="addPlayerToGameResponse" type="tns:addPlayerToGameResponse"></xs:element>
+
+<xs:element name="checkLetter" type="tns:checkLetter"></xs:element>
+
+<xs:element name="checkLetterResponse" type="tns:checkLetterResponse"></xs:element>
+
+<xs:element name="createGame" type="tns:createGame"></xs:element>
+
+<xs:element name="createGameResponse" type="tns:createGameResponse"></xs:element>
+
+<xs:element name="createPlayer" type="tns:createPlayer"></xs:element>
+
+<xs:element name="createPlayerResponse" type="tns:createPlayerResponse"></xs:element>
+
+<xs:element name="getGameById" type="tns:getGameById"></xs:element>
+
+<xs:element name="getGameByIdResponse" type="tns:getGameByIdResponse"></xs:element>
+
+<xs:element name="getGameList" type="tns:getGameList"></xs:element>
+
+<xs:element name="getGameListResponse" type="tns:getGameListResponse"></xs:element>
+
+<xs:element name="getPlayerById" type="tns:getPlayerById"></xs:element>
+
+<xs:element name="getPlayerByIdResponse" type="tns:getPlayerByIdResponse"></xs:element>
+
+<xs:element name="getPlayerList" type="tns:getPlayerList"></xs:element>
+
+<xs:element name="getPlayerListResponse" type="tns:getPlayerListResponse"></xs:element>
+
+<xs:element name="getPlayersAssignedToGame" type="tns:getPlayersAssignedToGame"></xs:element>
+
+<xs:element name="getPlayersAssignedToGameResponse" type="tns:getPlayersAssignedToGameResponse"></xs:element>
+
+<xs:complexType name="getGameList">
+<xs:sequence></xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="getGameListResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:Game" minOccurs="0" maxOccurs="unbounded"></xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="Game">
+<xs:complexContent>
+<xs:extension base="tns:abstractEntity">
+<xs:sequence>
+<xs:element name="category" type="tns:category" minOccurs="0"></xs:element>
+<xs:element name="gameResult" type="tns:gameResult" minOccurs="0"></xs:element>
+<xs:element name="status" type="tns:status" minOccurs="0"></xs:element>
+<xs:element name="word" type="xs:string" minOccurs="0"></xs:element>
+</xs:sequence>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+
+<xs:complexType name="abstractEntity" abstract="true">
+<xs:sequence></xs:sequence>
+<xs:attribute name="id" type="xs:long"></xs:attribute>
+</xs:complexType>
+
+<xs:complexType name="gameResult">
+<xs:complexContent>
+<xs:extension base="tns:abstractEntity">
+<xs:sequence>
+<xs:element name="game" type="tns:Game" minOccurs="0"></xs:element>
+<xs:element name="playerCountOfAttempt">
+<xs:complexType>
+<xs:sequence>
+<xs:element name="entry" minOccurs="0" maxOccurs="unbounded">
+<xs:complexType>
+<xs:sequence>
+<xs:element name="key" minOccurs="0" type="xs:long"></xs:element>
+<xs:element name="value" minOccurs="0" type="xs:int"></xs:element>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+<xs:element name="playerCountOfFailure">
+<xs:complexType>
+<xs:sequence>
+<xs:element name="entry" minOccurs="0" maxOccurs="unbounded">
+<xs:complexType>
+<xs:sequence>
+<xs:element name="key" minOccurs="0" type="xs:long"></xs:element>
+<xs:element name="value" minOccurs="0" type="xs:int"></xs:element>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+</xs:sequence>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+
+<xs:complexType name="getPlayerById">
+<xs:sequence>
+<xs:element name="id" type="xs:long" minOccurs="0"></xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="getPlayerByIdResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:Player" minOccurs="0"></xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="Player">
+<xs:complexContent>
+<xs:extension base="tns:abstractEntity">
+<xs:sequence>
+<xs:element name="name" type="xs:string" minOccurs="0"></xs:element>
+</xs:sequence>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+
+<xs:complexType name="getPlayerList">
+<xs:sequence></xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="getPlayerListResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:Player" minOccurs="0" maxOccurs="unbounded"></xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="createGame">
+<xs:sequence>
+<xs:element name="category" type="tns:category" minOccurs="0"></xs:element>
+<xs:element name="word" type="xs:string" minOccurs="0"></xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="createGameResponse">
+<xs:sequence>
+<xs:element name="return" type="xs:string" minOccurs="0"></xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="addPlayerToGame">
+<xs:sequence>
+<xs:element name="gameId" type="xs:long" minOccurs="0"></xs:element>
+<xs:element name="playerId" type="xs:long" minOccurs="0"></xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="addPlayerToGameResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:Game" minOccurs="0"></xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="checkLetter">
+<xs:sequence>
+<xs:element name="gameId" type="xs:long" minOccurs="0"></xs:element>
+<xs:element name="playerId" type="xs:long" minOccurs="0"></xs:element>
+<xs:element name="letter" type="xs:string" minOccurs="0"></xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="checkLetterResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:Game" minOccurs="0"></xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="getPlayersAssignedToGame">
+<xs:sequence>
+<xs:element name="gameId" type="xs:long" minOccurs="0"></xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="getPlayersAssignedToGameResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:Player" minOccurs="0" maxOccurs="unbounded"></xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="createPlayer">
+<xs:sequence>
+<xs:element name="name" type="xs:string" minOccurs="0"></xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="createPlayerResponse">
+<xs:sequence>
+<xs:element name="return" type="xs:long" minOccurs="0"></xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="getGameById">
+<xs:sequence>
+<xs:element name="id" type="xs:long" minOccurs="0"></xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="getGameByIdResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:Game" minOccurs="0"></xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:simpleType name="category">
+<xs:restriction base="xs:string">
+<xs:enumeration value="BABY_ROOM"></xs:enumeration>
+<xs:enumeration value="BATHROOM"></xs:enumeration>
+<xs:enumeration value="BEDROOM"></xs:enumeration>
+<xs:enumeration value="CAR_PARTS"></xs:enumeration>
+<xs:enumeration value="CLOTHES"></xs:enumeration>
+<xs:enumeration value="CONSTRUCTION_SITE"></xs:enumeration>
+<xs:enumeration value="COOKING_INSTRUCTIONS"></xs:enumeration>
+<xs:enumeration value="COUNTRIES"></xs:enumeration>
+<xs:enumeration value="DINING_ROOM"></xs:enumeration>
+<xs:enumeration value="FAMILY_MEMBERS"></xs:enumeration>
+<xs:enumeration value="FRUIT_VEGETABLES"></xs:enumeration>
+<xs:enumeration value="JOBS"></xs:enumeration>
+<xs:enumeration value="KITCHEN"></xs:enumeration>
+<xs:enumeration value="LIVING_ROOM"></xs:enumeration>
+<xs:enumeration value="OFFICE_EQUIPMENT"></xs:enumeration>
+<xs:enumeration value="PARTS_OF_THE_BODY"></xs:enumeration>
+<xs:enumeration value="UNIVERSE_SPACE"></xs:enumeration>
+<xs:enumeration value="WILD_ANIMALS_PETS"></xs:enumeration>
+<xs:enumeration value="WORKSHOP_TOOLS"></xs:enumeration>
+</xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name="status">
+<xs:restriction base="xs:string">
+<xs:enumeration value="ONGOING"></xs:enumeration>
+<xs:enumeration value="ENDED"></xs:enumeration>
+<xs:enumeration value="PREPARAE"></xs:enumeration>
+</xs:restriction>
+</xs:simpleType>
+</xs:schema>
