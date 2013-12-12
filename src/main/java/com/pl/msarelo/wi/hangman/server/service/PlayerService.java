@@ -18,11 +18,18 @@ import java.util.List;
 public class PlayerService extends Service<Player> {
 
     public Player createPlayer(String name) {
-        return dao.save(new Player(name));
+        if (!this.playerExists(name)) {
+            return dao.save(new Player(name));
+        } else {
+            return null;
+        }
+    }
+
+    public Boolean playerExists(String name) {
+        return (this.getByName(name) != null);
     }
 
     public List<Player> getPlayersAssignedToGame(Game game) {
-
         List<Object> list = new LinkedList<Object>();
         list.add(game);
         return dao.executeNamedQuery("getPlayersAssignedToGame", Arrays.asList(Game.class.getSimpleName()), list);
@@ -31,7 +38,12 @@ public class PlayerService extends Service<Player> {
     public Player getByName(String name) {
         List<Object> list = new LinkedList<Object>();
         list.add(name);
-        return (Player) dao.executeNamedQuery("getPlayerByName", Arrays.asList("name"), list).get(0);
+        List<Player> players = dao.executeNamedQuery("getPlayerByName", Arrays.asList("name"), list);
+        if (!players.isEmpty()) {
+            return (Player) players.get(0);
+        } else {
+            return null;
+        }
     }
 
 }
