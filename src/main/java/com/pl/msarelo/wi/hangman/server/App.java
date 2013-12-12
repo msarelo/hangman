@@ -15,7 +15,6 @@ public class App {
 	List<Game> games = gameService.getAll();
 	GameManager gameManager = new GameManager();
 
-//		String url = "http://192.168.2.142:8080/hangman"; // praca
 	String url = "http://localhost:8080/hangman";
 
 	Endpoint.publish(url, gameManager);

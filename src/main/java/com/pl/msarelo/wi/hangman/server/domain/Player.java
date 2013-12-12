@@ -26,7 +26,11 @@ import javax.xml.bind.annotation.XmlType;
     ),
     @NamedQuery(
             name = "Player.getPlayersAssignedToGame",
-            query = "SELECT p FROM Player p WHERE :game MEMBER OF p.games  "
+            query = "SELECT p FROM Player p WHERE :game MEMBER OF p.games"
+    ),
+    @NamedQuery(
+            name = "Player.getPlayerByName",
+            query = "SELECT p FROM Player p WHERE :name = p.name"
     )
 }
 )

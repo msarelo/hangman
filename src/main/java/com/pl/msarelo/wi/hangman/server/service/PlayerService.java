@@ -18,14 +18,20 @@ import java.util.List;
 public class PlayerService extends Service<Player> {
 
     public Player createPlayer(String name) {
-	return dao.save(new Player(name));
+        return dao.save(new Player(name));
     }
 
     public List<Player> getPlayersAssignedToGame(Game game) {
-        
+
         List<Object> list = new LinkedList<Object>();
         list.add(game);
-        return dao.executeNamedQuery("getPlayersAssignedToGame", Arrays.asList(Game.class.getSimpleName()),list );
+        return dao.executeNamedQuery("getPlayersAssignedToGame", Arrays.asList(Game.class.getSimpleName()), list);
     }
-       
+
+    public Player getByName(String name) {
+        List<Object> list = new LinkedList<Object>();
+        list.add(name);
+        return (Player) dao.executeNamedQuery("getPlayerByName", Arrays.asList("name"), list).get(0);
+    }
+
 }
