@@ -42,4 +42,13 @@ public class WSClient {
         }
         return localPlayersToCreate;
     }
+
+    public Player getPlayerByName(String playerName) throws WSException {
+        return this.port.getPlayerByName(playerName);
+    }
+
+    public Game createGame(Game game) {
+        System.out.println(this.port.createGame(game.getCategory(), game.getWord()));
+        return null;
+    }
 }

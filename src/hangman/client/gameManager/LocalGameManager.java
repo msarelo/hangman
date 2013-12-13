@@ -9,7 +9,10 @@ package hangman.client.gameManager;
 import hangman.client.Game;
 import hangman.client.Player;
 import hangman.client.view.ExitException;
+import hangman.client.view.GoBackException;
+import hangman.client.view.SpecialEnum;
 import hangman.client.view.View;
+import hangman.client.view.enums.CreateGameEnum;
 import hangman.client.wsClient.WSClient;
 import hangman.client.wsClient.WSException;
 import java.util.ArrayList;
@@ -28,7 +31,7 @@ public class LocalGameManager {
     private View view;
   
     private LocalGameManager() {
-        this.localPlayers = new ArrayList<Player>();
+        this.localPlayers = new ArrayList<>();
         this.inGame = false;
         this.wsClient = WSClient.getInstance();
         this.view = View.getInstance();
@@ -49,12 +52,24 @@ public class LocalGameManager {
     }
     
     private List<Player> createLocalPlayers() throws GMException, ExitException {
-        List<Player> localPlayersToCreate = this.view.getLocalPlayersList();
+        List<Player> localPlayers = this.view.getLocalPlayersList();
         try {
+            List<Player> existingPlayers = new ArrayList<>();
+            List<Player> localPlayersToCreate = new ArrayList<>();
+
+            for (Player playerToCheck : localPlayers) {
+                Player existingPlayer = this.wsClient.getPlayerByName(playerToCheck.getName());
+                if (existingPlayer != null) {
+                    existingPlayers.add(existingPlayer);
+                } else {
+                    localPlayersToCreate.add(playerToCheck);
+                }
+            }
             List<Player> createdPlayers = this.wsClient.createPlayers(localPlayersToCreate);
             this.localPlayers = createdPlayers;
+            this.localPlayers.addAll(existingPlayers);
         } catch (WSException couldNotCreatePlayers) {
-            throw new GMException("Nie mozna bylo utworzyc graczy. Powod: " + couldNotCreatePlayers.getMessage());
+            throw new GMException("Nie mozna bylo utworzyc lub sprawdzic graczy. Powod: " + couldNotCreatePlayers.getMessage());
         }
         return this.localPlayers;
     }
@@ -67,8 +82,24 @@ public class LocalGameManager {
         return (!this.localPlayers.isEmpty());
     }
 
-    public Game chooseGame() {
-        
+    public Game chooseGame() throws ExitException {
+        Game game = null;
+        do {
+            SpecialEnum choice;
+            choice = this.view.joinOrCreateGame();
+            try {
+                if (choice == CreateGameEnum.CHOOSE_GAME) {
+                    List<Game> gamesList = this.wsClient.getGameList();
+                    game = this.view.chooseGame(gamesList);
+                } else {
+                    game = this.view.prepareGameData();
+                    game = this.wsClient.createGame(game);
+                }
+            } catch (GoBackException goBack) {
+                game = null;
+            }
+        } while (game == null);
+        return game;
     }
 
     public void joinGame(Game game) {

@@ -20,8 +20,6 @@ public class HangmanClient {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // TODO code application logic here
-        
         LocalGameManager GM = LocalGameManager.getInstance();
         try {
             //getting local players
