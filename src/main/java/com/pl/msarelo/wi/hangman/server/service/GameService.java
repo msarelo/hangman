@@ -14,9 +14,9 @@ import com.pl.msarelo.wi.hangman.server.domain.Player;
  */
 public class GameService extends Service<Game> {
 
-    public void createGame(Game.Category category, String word) {
+    public Game createGame(Game.Category category, String word) {
         Game game = new Game(category, word);
-        dao.save(game);
+        return dao.save(game);
     }
 
     public Game addPlayerToGame(Player player, Game game) {

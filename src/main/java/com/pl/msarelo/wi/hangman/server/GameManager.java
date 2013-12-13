@@ -55,10 +55,9 @@ public class GameManager {
     }
 
     @WebMethod
-    public String createGame(@WebParam(name = "category") Game.Category category, @WebParam(name = "word") String word) {
+    public Game createGame(@WebParam(name = "category") Game.Category category, @WebParam(name = "word") String word) {
 	System.out.println("createGame with params: " + category + " " + word);
-	gameService.createGame(category, word);
-	return "Success";
+	return gameService.createGame(category, word);
     }
 
     @WebMethod
