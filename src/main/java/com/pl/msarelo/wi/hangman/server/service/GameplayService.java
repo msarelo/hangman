@@ -25,27 +25,34 @@ public class GameplayService {
     public Game checkLetter(Long gameId, Long playerId, Character letter) {
         Player player = playerService.findById(playerId);
         Game game = gameService.findById(gameId);
-        
-        
-        
-        
-        
-        
 
 //        if (game.getWord().length() > game.getGameResult().getPlayerCountOfFailure().get(player) && game.getWord().length() > game.getGameResult().getPlayerCountOfAttempt().get(player)) {
-            if (!game.getUsedChars().contains(letter)) {
-                if (!game.getWord().contains(letter.toString())) {
-                    game.nextFailureAttempt(player);
-                } else {
-                    game.nextAttempt(player);
-                }
-                game.getUsedChars().add(letter);
-            }else{
+        if (!game.getUsedChars().contains(letter)) {
+            if (!game.getWord().contains(letter.toString())) {
                 game.nextFailureAttempt(player);
+            } else {
+                game.nextAttempt(player);
             }
+            game.getUsedChars().add(letter);
+        } else {
+            game.nextFailureAttempt(player);
+        }
 //        }
 
         gameService.dao.saveOrUpdate(game);
         return game;
+    }
+
+    public Game startGame(Long gameId, Long playerId) throws Exception {
+
+        Game game = gameService.findById(gameId);
+        if (game.getGameResult().getPlayerCountOfAttempt().keySet().toArray()[0] == playerId) {
+            game.setStatus(Game.Status.ONGOING);
+            game = gameService.dao.saveOrUpdate(game);
+        } else{
+            throw new Exception("No access to start this game");
+        }
+        return game;
+
     }
 }

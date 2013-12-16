@@ -26,61 +26,75 @@ public class GameManager {
 
     @WebMethod
     public Game getGameById(@WebParam(name = "id") Long id) {
-	System.out.println("getGameById with param: " + id);
-	return gameService.findById(id);
+        System.out.println("getGameById with param: " + id);
+        return gameService.findById(id);
     }
 
     @WebMethod
     public Player getPlayerById(@WebParam(name = "id") Long id) {
-	System.out.println("getPlayerById with param: " + id);
-	return playerService.findById(id);
+        System.out.println("getPlayerById with param: " + id);
+        return playerService.findById(id);
     }
-    
+
     @WebMethod
     public Player getPlayerByName(@WebParam(name = "name") String name) {
-	System.out.println("getPlayerByName with param: " + name);
-	return playerService.getByName(name);
+        System.out.println("getPlayerByName with param: " + name);
+        return playerService.getByName(name);
     }
 
     @WebMethod
     public List<Game> getGameList() {
-	System.out.println("getGameList");
-	return gameService.getAll();
-    }
-    
-    @WebMethod
-    public List<Player> getPlayerList() {
-	System.out.println("getPlayerList");
-	return playerService.getAll();
+        System.out.println("getGameList");
+        return gameService.getAll();
     }
 
     @WebMethod
-    public Game createGame(@WebParam(name = "category") Game.Category category, @WebParam(name = "word") String word) {
-	System.out.println("createGame with params: " + category + " " + word);
-	return gameService.createGame(category, word);
+    public List<Player> getPlayerList() {
+        System.out.println("getPlayerList");
+        return playerService.getAll();
+    }
+
+    @WebMethod
+    public String createGame(@WebParam(name = "category") Game.Category category, @WebParam(name = "word") String word, @WebParam(name = "playerId") Long playerId) {
+        System.out.println("createGame with params: " + category + " " + word + " playerId: " + playerId + " }");
+        gameService.createGame(category, word, playerId);
+        return "Success";
     }
 
     @WebMethod
     public Long createPlayer(@WebParam(name = "name") String name) {
-	System.out.println("createPlayer with params: " + name);
-	return playerService.createPlayer(name).getId();
+        System.out.println("createPlayer with params: " + name);
+        return playerService.createPlayer(name).getId();
     }
 
     @WebMethod
     public Game addPlayerToGame(@WebParam(name = "gameId") Long gameId, @WebParam(name = "playerId") Long playerId) {
-	System.out.println("addPlayerToGame with params: { gameId: " + gameId + " playerId: " + playerId+" }");
-	return gameService.addPlayerToGame(playerService.findById(playerId), gameService.findById(gameId));
+        System.out.println("addPlayerToGame with params: { gameId: " + gameId + " playerId: " + playerId + " }");
+        return gameService.addPlayerToGame(playerService.findById(playerId), gameService.findById(gameId));
     }
-    
+
     @WebMethod
-    public List<Player> getPlayersAssignedToGame(@WebParam(name = "gameId") Long gameId ) {
-	System.out.println("getPlayersAssignedToGame with params: { gameId: " + gameId +" }");
-	return playerService.getPlayersAssignedToGame(gameService.findById(gameId));
+    public List<Player> getPlayersAssignedToGame(@WebParam(name = "gameId") Long gameId) {
+        System.out.println("getPlayersAssignedToGame with params: { gameId: " + gameId + " }");
+        return playerService.getPlayersAssignedToGame(gameService.findById(gameId));
     }
 
     @WebMethod
     public Game checkLetter(@WebParam(name = "gameId") Long gameId, @WebParam(name = "playerId") Long playerId, @WebParam(name = "letter") String letter) {
-	System.out.println("checkLetter with params: { gameId: " + gameId + " playerId: " + playerId + " letter: " + letter + " }");
-	return gameplayService.checkLetter(gameId, playerId, new Character(letter.toCharArray()[0]));
+        System.out.println("checkLetter with params: { gameId: " + gameId + " playerId: " + playerId + " letter: " + letter + " }");
+        return gameplayService.checkLetter(gameId, playerId, new Character(letter.toCharArray()[0]));
     }
+
+    @WebMethod
+    public Game startGame(@WebParam(name = "gameId") Long gameId, @WebParam(name = "playerId") Long playerId) {
+        System.out.println("startGame with params: { gameId: " + gameId + " playerId: " + playerId + " }");
+        try {
+            return gameplayService.startGame(gameId, playerId);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
+
+    }
+
 }

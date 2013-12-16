@@ -10,7 +10,7 @@ public class App {
     public static void main(String[] args) {
 
 	GameService gameService = new GameService();
-	gameService.createGame(Game.Category.BATHROOM, "zlew");
+//	gameService.createGame(Game.Category.BATHROOM, "zlew");
 
 	List<Game> games = gameService.getAll();
 	GameManager gameManager = new GameManager();

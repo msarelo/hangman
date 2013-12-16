@@ -13,10 +13,14 @@ import com.pl.msarelo.wi.hangman.server.domain.Player;
  * @author marcin
  */
 public class GameService extends Service<Game> {
+    
+     private final PlayerService playerService = new PlayerService();
 
-    public Game createGame(Game.Category category, String word) {
+    public void createGame(Game.Category category, String word, Long playerId) {
         Game game = new Game(category, word);
-        return dao.save(game);
+        dao.save(game);
+
+        addPlayerToGame(playerService.findById(playerId), game);
     }
 
     public Game addPlayerToGame(Player player, Game game) {
@@ -34,7 +38,7 @@ public class GameService extends Service<Game> {
 
         game = dao.saveOrUpdate(game);
 
-        PlayerService playerService = new PlayerService();
+       
         if (player.getGames().contains(game)) {
             player.getGames().remove(game);
         }
@@ -44,4 +48,5 @@ public class GameService extends Service<Game> {
         return game;
 
     }
+    
 }
