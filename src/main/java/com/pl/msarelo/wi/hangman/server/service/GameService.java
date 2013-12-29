@@ -16,11 +16,12 @@ public class GameService extends Service<Game> {
     
      private final PlayerService playerService = new PlayerService();
 
-    public void createGame(Game.Category category, String word, Long playerId) {
+    public Game createGame(Game.Category category, String word, Long playerId) {
         Game game = new Game(category, word);
-        dao.save(game);
+        game = dao.save(game);
 
         addPlayerToGame(playerService.findById(playerId), game);
+        return game;
     }
 
     public Game addPlayerToGame(Player player, Game game) {
