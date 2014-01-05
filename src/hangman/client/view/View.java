@@ -9,11 +9,16 @@ package hangman.client.view;
 import hangman.client.Category;
 import hangman.client.Game;
 import hangman.client.Player;
+import hangman.client.Status;
+import hangman.client.gameManager.GMException;
+import hangman.client.gameManager.LocalGameManager;
 import hangman.client.view.enums.CreateGameEnum;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -25,7 +30,7 @@ public class View {
     public static void sayGoodBye() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    private View() {}
+    protected View() {}
     
     public static View getInstance() {
         if (View.instance == null) {
@@ -92,11 +97,18 @@ public class View {
     }
 
     public Game chooseGame(List<Game> gameList) throws GoBackException, ExitException {
+        List<Game> filteredGames = new ArrayList<>();
+        for (Game game : gameList) {
+            if (game.getStatus() == Status.PREPARAE) {
+                filteredGames.add(game);
+            }
+        }
+        gameList = filteredGames;
         if (gameList.isEmpty()) {
-            this.printLine("Aktualnie nie toczy sie zadna gra na serwerze");
+            this.printLine("Aktualnie nie ma na serwerze gier do ktorych mozna dolaczyc");
             throw new GoBackException();
         } else {
-            List<String> gameNames = new ArrayList<String>();
+            List<String> gameNames = new ArrayList<>();
             for (Game game : gameList) {
                 gameNames.add("Kategoria: " + game.getCategory() + " długość słowa: " + Integer.toString(game.getWord().length()) + " (" + game.getId().toString() + ")");
             }
@@ -222,14 +234,88 @@ public class View {
         return response;
     }
 
-    private void clearOutput() {
+    protected void clearOutput() {
         //temporary solution (they like to stay that way...)
         for (int i=0; i<50; i++) {
                 this.printLine("");
         }
     }
 
-    private void printLine(String text) {
+    protected void printLine(String text) {
         System.out.println(text);
+    }
+
+    public int getGameStep(Game ongoingGame, List<Player> players) throws ExitException {
+        GamePrinter.getInstance().printGame(
+                ongoingGame,
+                players,
+                LocalGameManager.getInstance().getAdmin(ongoingGame, players).getId(),
+                LocalGameManager.getInstance().getActivePlayer(ongoingGame, players).getId()
+        );
+        return this.getUserInteractionOrSleep(ongoingGame, players);
+    }
+
+    public int adminStartGame(Game game, List<Player> players) {
+        GamePrinter.getInstance().printPlayerList(
+                players,
+                LocalGameManager.getInstance().getAdmin(game, players).getId(),
+                LocalGameManager.getInstance().getActivePlayer(game, players).getId()
+        );
+        List<String> options = new ArrayList<>();
+        options.add("Rozpocznij grę");
+        options.add("Odśwież listę graczy");
+        try {
+            return this.getUserResponse(options, false, false, false);
+        } catch (ExitException ex) {
+            Logger.getLogger(View.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (GoBackException ex) {
+            Logger.getLogger(View.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return 2;
+    }
+
+    private int getUserInteractionOrSleep(Game ongoingGame, List<Player> players) throws ExitException {
+        LocalGameManager gameManager = LocalGameManager.getInstance();
+        Player activePlayer = gameManager.getActivePlayer(ongoingGame, players);
+        try {
+            if (gameManager.getLocalPlayers().contains(activePlayer)) {
+                List<String> options = new ArrayList<>();
+                options.add("Zgadnij literkę");
+                options.add("Zgadnij słowo");
+                try {
+                    return this.getUserResponse(options, false, true, false);
+                } catch (GoBackException ex) {
+                    Logger.getLogger(View.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } else {
+                Thread.sleep(1000);
+                return 0;
+            }
+        } catch (GMException | InterruptedException e){}
+        return 0;
+    }
+
+    public void waitForStart(Game game, List<Player> players) {
+        this.clearOutput();
+        GamePrinter.getInstance().printPlayerList(
+                players,
+                LocalGameManager.getInstance().getAdmin(game, players).getId(),
+                LocalGameManager.getInstance().getActivePlayer(game, players).getId()
+        );
+        this.printLine("Oczekiwanie na start...");
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(View.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void cannotJoinToGame() {
+        this.printLine("Nie udało się dołączyć do gry. Spróbuj ponownie za chwilę...");
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(View.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

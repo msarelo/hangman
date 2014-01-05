@@ -7,7 +7,10 @@
 package hangman.client.gameManager;
 
 import hangman.client.Game;
+import hangman.client.GameResult;
+import hangman.client.GameResult.PlayerCountOfAttempt.Entry;
 import hangman.client.Player;
+import hangman.client.Status;
 import hangman.client.view.ExitException;
 import hangman.client.view.GoBackException;
 import hangman.client.view.SpecialEnum;
@@ -17,6 +20,8 @@ import hangman.client.wsClient.WSClient;
 import hangman.client.wsClient.WSException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -29,12 +34,14 @@ public class LocalGameManager {
     private boolean inGame;
     private WSClient wsClient;
     private View view;
-  
+    private boolean gameCreatedLocally;
+    
     private LocalGameManager() {
         this.localPlayers = new ArrayList<>();
         this.inGame = false;
         this.wsClient = WSClient.getInstance();
         this.view = View.getInstance();
+
     }
     
     public static LocalGameManager getInstance() {
@@ -91,9 +98,11 @@ public class LocalGameManager {
                 if (choice == CreateGameEnum.CHOOSE_GAME) {
                     List<Game> gamesList = this.wsClient.getGameList();
                     game = this.view.chooseGame(gamesList);
+                    this.gameCreatedLocally = false;
                 } else {
                     game = this.view.prepareGameData();
-                    game = this.wsClient.createGame(game);
+                    game = this.wsClient.createGame(game, this.localPlayers.get(0));
+                    this.gameCreatedLocally = true;
                 }
             } catch (GoBackException goBack) {
                 game = null;
@@ -102,11 +111,109 @@ public class LocalGameManager {
         return game;
     }
 
-    public void joinGame(Game game) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public boolean joinGame(Game game) {
+        try {            
+            if (this.gameCreatedLocally) {
+                if (this.getLocalPlayers().size() > 1) {
+                    //for local game we need to remove Admin player which was already passed on game creation
+                    this.inGame = this.wsClient.joinGame(game, this.getLocalPlayers().subList(1, this.getLocalPlayers().size()-1));
+                } else {
+                    //only one player which created the game - no need to add players
+                    this.inGame = true;
+                }
+            } else {
+                this.inGame = this.wsClient.joinGame(game, this.getLocalPlayers());
+            }
+        } catch (Exception ex) { //never gonna happen on this step
+        }
+        if (!this.inGame) {
+            this.view.notify("Nie udalo sie dolaczyc do gry");
+        }
+        return this.inGame;
     }
 
-    public void playGame(Game game) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void playGame(Game game) throws ExitException {
+        Game ongoingGame;
+        List<Player> players;
+        do {
+            ongoingGame = this.wsClient.getGameStatus(game.getId());
+            players = this.wsClient.getPlayers(game.getId());
+            if (ongoingGame.getStatus() == Status.PREPARAE && this.gameHasLocalAdmin(ongoingGame)) {
+                if (1 == this.view.adminStartGame(ongoingGame, players)) {
+                    Game gameStarted = this.startGame(game, this.getAdmin(ongoingGame, players).getId());
+                    if (gameStarted.getStatus() != Status.ONGOING) {
+                        this.view.cannotJoinToGame();
+                    }
+                }
+            } else if (ongoingGame.getStatus() == Status.PREPARAE) {
+                this.view.waitForStart(game, players);
+            } else {
+                this.view.getGameStep(ongoingGame, players);
+            }
+        } while(ongoingGame.getStatus() != Status.ENDED);
+        //obsluga konca gry tutaj! tj wyswietlic statystyki slowo itp.
+    }
+
+    public boolean gameHasLocalAdmin(Game ongoingGame) {
+        return (this.getLocalPlayersIds().contains(this.getFirstPlayer(ongoingGame)));
+    }
+
+    private Game startGame(Game game, Long adminId) {
+        return this.wsClient.startGame(game, adminId);
+    }
+
+    private List<Long> getLocalPlayersIds() {
+        List<Long> localPlayerIds = new ArrayList<>();
+        try {
+            for (Player player : this.getLocalPlayers()) {
+                localPlayerIds.add(player.getId());
+            }
+        } catch (GMException | ExitException ex) {
+            Logger.getLogger(LocalGameManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return localPlayerIds;
+    }
+
+    public Long getFirstPlayer(Game game) {
+        return game.getGameResult().getPlayerCountOfAttempt().getEntry().get(0).getKey();
+    }
+
+    public Player getAdmin(Game game, List<Player> players) {
+        Long adminId = this.getFirstPlayer(game);
+        return this.getPlayerById(adminId, players);
+    }
+
+    public Player getActivePlayer(Game game, List<Player> players) {
+        List<Entry> attempts = game.getGameResult().getPlayerCountOfAttempt().getEntry();
+        int attemptCount = attempts.get(0).getValue();
+        for (Entry attempt : attempts) {
+            if (attempt.getValue() < attemptCount) {
+                return this.getPlayerById(attempt.getKey(), players);
+            }
+        }
+        return this.getPlayerById(attempts.get(0).getKey(), players);
+    }
+
+    private Player getPlayerById(Long playerId, List<Player> players) {
+        for (Player player : players) {
+            if (player.getId().equals(playerId)) {
+                return player;
+            }
+        }
+        return null;
+    }
+
+    public boolean isLocalGame() {
+        return this.gameCreatedLocally;
+    }
+
+    public int getFailureAttempts(Game game, Long playerId) {
+        List<GameResult.PlayerCountOfFailure.Entry> attempts = game.getGameResult().getPlayerCountOfFailure().getEntry();
+        for (GameResult.PlayerCountOfFailure.Entry attempt : attempts) {
+            if (attempt.getKey().equals(playerId)) {
+                return attempt.getValue();
+            }
+        }
+        return 0;
     }
 }

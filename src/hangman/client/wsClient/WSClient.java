@@ -47,8 +47,26 @@ public class WSClient {
         return this.port.getPlayerByName(playerName);
     }
 
-    public Game createGame(Game game) {
-        System.out.println(this.port.createGame(game.getCategory(), game.getWord()));
-        return null;
+    public Game createGame(Game game, Player admin) {
+        return this.port.createGame(game.getCategory(), game.getWord(), admin.getId());
+    }
+
+    public boolean joinGame(Game game, List<Player> localPlayers) {
+        for (Player player : localPlayers) {
+            this.port.addPlayerToGame(game.getId(), player.getId());
+        }
+        return true;
+    }
+
+    public Game getGameStatus(Long gameId) {
+        return this.port.getGameById(gameId);
+    }
+
+    public Game startGame(Game game, Long adminId) {
+        return this.port.startGame(game.getId(), adminId);
+    }
+
+    public List<Player> getPlayers(Long id) {
+        return this.port.getPlayersAssignedToGame(id);
     }
 }
