@@ -46,7 +46,7 @@ public class GameplayService {
     public Game startGame(Long gameId, Long playerId) throws Exception {
 
         Game game = gameService.findById(gameId);
-        if (game.getGameResult().getPlayerCountOfAttempt().keySet().toArray()[0] == playerId) {
+        if (game.getGameResult().getPlayerCountOfAttempt().keySet().toArray()[0].equals(playerId)) {
             game.setStatus(Game.Status.ONGOING);
             game = gameService.dao.saveOrUpdate(game);
         } else{
