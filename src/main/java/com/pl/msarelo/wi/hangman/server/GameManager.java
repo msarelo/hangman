@@ -5,6 +5,7 @@ import com.pl.msarelo.wi.hangman.server.domain.Player;
 import com.pl.msarelo.wi.hangman.server.service.GameService;
 import com.pl.msarelo.wi.hangman.server.service.GameplayService;
 import com.pl.msarelo.wi.hangman.server.service.PlayerService;
+import java.util.HashMap;
 import java.util.List;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
@@ -17,11 +18,15 @@ import javax.jws.WebService;
 @WebService
 public class GameManager {
 
-    private GameService gameService = new GameService();
-    private PlayerService playerService = new PlayerService();
-    private GameplayService gameplayService = new GameplayService(playerService, gameService);
+    private GameService gameService;
+    private PlayerService playerService;
+    private GameplayService gamePlayService;
 
-    public GameManager() {
+    public GameManager(HashMap<Game.Category, List<String>> words) {
+
+        gameService = new GameService(words);
+        playerService = new PlayerService();
+        gamePlayService = new GameplayService(playerService, gameService);
     }
 
     @WebMethod
@@ -55,9 +60,15 @@ public class GameManager {
     }
 
     @WebMethod
-    public Game createGame(@WebParam(name = "category") Game.Category category, @WebParam(name = "word") String word, @WebParam(name = "playerId") Long playerId) {
+    public Game createGame(@WebParam(name = "category") Game.Category category, @WebParam(name = "playerId") Long playerId) {
+        System.out.println("createGame with params: " + " playerId: " + playerId + " }");
+        return gameService.createGame(category, playerId);
+    }
+
+    @WebMethod
+    public Game createGameWithWord(@WebParam(name = "category") Game.Category category, @WebParam(name = "word") String word, @WebParam(name = "playerId") Long playerId) {
         System.out.println("createGame with params: " + category + " " + word + " playerId: " + playerId + " }");
-        return gameService.createGame(category, word, playerId);
+        return gameService.createGameWithWord(category, word, playerId);
     }
 
     @WebMethod
@@ -81,14 +92,25 @@ public class GameManager {
     @WebMethod
     public Game checkLetter(@WebParam(name = "gameId") Long gameId, @WebParam(name = "playerId") Long playerId, @WebParam(name = "letter") String letter) {
         System.out.println("checkLetter with params: { gameId: " + gameId + " playerId: " + playerId + " letter: " + letter + " }");
-        return gameplayService.checkLetter(gameId, playerId, new Character(letter.toCharArray()[0]));
+        return gamePlayService.checkLetter(gameId, playerId, new Character(letter.trim().toLowerCase().toCharArray()[0]));
     }
 
     @WebMethod
     public Game startGame(@WebParam(name = "gameId") Long gameId, @WebParam(name = "playerId") Long playerId) {
         System.out.println("startGame with params: { gameId: " + gameId + " playerId: " + playerId + " }");
         try {
-            return gameplayService.startGame(gameId, playerId);
+            return gamePlayService.startGame(gameId, playerId);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
+    @WebMethod
+    public Player getGameAdmin(@WebParam(name = "gameId") Long gameId) {
+        System.out.println("getGameAdmin with params: { gameId: " + gameId + " }");
+        try {
+            return gamePlayService.getAdmin(gameId);
         } catch (Exception ex) {
             ex.printStackTrace();
             return null;

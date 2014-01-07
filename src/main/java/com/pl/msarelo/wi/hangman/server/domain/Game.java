@@ -29,7 +29,8 @@ import javax.xml.bind.annotation.XmlType;
     )})
 public class Game extends AbstractEntity {
 
-    private static final int MAX_ATTEMPTS = 9;
+    public static final int MAX_ATTEMPTS = 9;
+    public static final String PLAYER_LOSE = "Player lose";
 
     private String word;
     private Status status;
@@ -38,6 +39,8 @@ public class Game extends AbstractEntity {
     private List<Character> usedChars;
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private GameResult gameResult;
+    private Player playerAdmin;
+
     public Game() {
     }
 
@@ -94,25 +97,26 @@ public class Game extends AbstractEntity {
     }
 
     public String nextFailureAttempt(Player player) {
-        String result = null;
+        String result = "";
 
         nextAttempt(player);
 
-        Integer count = getGameResult().getPlayerCountOfFailure().get(player);
+        Integer count = getGameResult().getPlayerCountOfFailure().get(player.getId());
 
         if (count >= MAX_ATTEMPTS) {
-            result = "Player lose";
+            result = PLAYER_LOSE;
+            System.out.println(PLAYER_LOSE);
         } else {
             count++;
             getGameResult().getPlayerCountOfFailure().put(player.getId(), count);
-            result = count.toString();
+//            result = count.toString();
         }
         return result;
     }
 
     public String nextAttempt(Player player) {
         String result = null;
-        Integer count = getGameResult().getPlayerCountOfAttempt().get(player);
+        Integer count = getGameResult().getPlayerCountOfAttempt().get(player.getId());
         count++;
         getGameResult().getPlayerCountOfAttempt().put(player.getId(), count);
         result = count.toString();
@@ -130,4 +134,13 @@ public class Game extends AbstractEntity {
 
         BABY_ROOM, BATHROOM, BEDROOM, CAR_PARTS, CLOTHES, CONSTRUCTION_SITE, COOKING_INSTRUCTIONS, COUNTRIES, DINING_ROOM, FAMILY_MEMBERS, FRUIT_VEGETABLES, JOBS, KITCHEN, LIVING_ROOM, OFFICE_EQUIPMENT, PARTS_OF_THE_BODY, UNIVERSE_SPACE, WILD_ANIMALS_PETS, WORKSHOP_TOOLS
     }
+
+    public Player getAdmin() {
+        return playerAdmin;
+    }
+
+    public void setAdmin(Player admin) {
+        this.playerAdmin = admin;
+    }
+
 }

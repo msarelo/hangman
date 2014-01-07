@@ -23,36 +23,60 @@ public class GameplayService {
     }
 
     public Game checkLetter(Long gameId, Long playerId, Character letter) {
-        Player player = playerService.findById(playerId);
+
         Game game = gameService.findById(gameId);
 
-//        if (game.getWord().length() > game.getGameResult().getPlayerCountOfFailure().get(player) && game.getWord().length() > game.getGameResult().getPlayerCountOfAttempt().get(player)) {
-        if (!game.getUsedChars().contains(letter)) {
-            if (!game.getWord().contains(letter.toString())) {
-                game.nextFailureAttempt(player);
-            } else {
-                game.nextAttempt(player);
-            }
-            game.getUsedChars().add(letter);
-        } else {
-            game.nextFailureAttempt(player);
-        }
-//        }
+        if (game.getStatus().equals(Game.Status.ONGOING)) {
+            Player player = playerService.findById(playerId);
+            String word = game.getWord();
+            String resultOfAttempt = "";
 
-        gameService.dao.saveOrUpdate(game);
+//        if (game.getWord().length() > game.getGameResult().getPlayerCountOfFailure().get(player.getId()) && game.getWord().length() > game.getGameResult().getPlayerCountOfAttempt().get(player.getId())) {
+            if (!game.getUsedChars().contains(letter)) {
+                if (!word.contains(letter.toString())) {
+                    resultOfAttempt = game.nextFailureAttempt(player);
+                } else {
+                    resultOfAttempt = game.nextAttempt(player);
+                }
+                game.getUsedChars().add(letter);
+            } else {
+                resultOfAttempt = game.nextFailureAttempt(player);
+            }
+
+            if (!resultOfAttempt.equals(game.PLAYER_LOSE) && !resultOfAttempt.equals("")) {
+                Integer positiveAttempts = Integer.valueOf(resultOfAttempt) - game.getGameResult().getPlayerCountOfFailure().get(player.getId());
+                System.out.println("positive:" + positiveAttempts);
+                if (positiveAttempts >= word.length()) {
+                    game.setStatus(Game.Status.ENDED);
+                    System.out.println(Game.Status.ENDED);
+                }
+
+            }
+//            }
+
+            gameService.dao.saveOrUpdate(game);
+        }
         return game;
     }
 
     public Game startGame(Long gameId, Long playerId) throws Exception {
 
         Game game = gameService.findById(gameId);
-        if (game.getGameResult().getPlayerCountOfAttempt().keySet().toArray()[0].equals(playerId)) {
-            game.setStatus(Game.Status.ONGOING);
-            game = gameService.dao.saveOrUpdate(game);
+        if (game.getStatus().equals(Game.Status.PREPARAE)) {
+            if (game.getAdmin().getId().equals(playerId)) {
+                game.setStatus(Game.Status.ONGOING);
+                game = gameService.dao.saveOrUpdate(game);
+            } else {
+                throw new Exception("No access to start this game");
+            }
         } else{
-            throw new Exception("No access to start this game");
+            throw  new Exception("You cannot start ONGOING or ENDED game");
         }
         return game;
 
+    }
+
+    public Player getAdmin(Long gameId) {
+        return gameService.findById(gameId).getAdmin();
     }
 }
