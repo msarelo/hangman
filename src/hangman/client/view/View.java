@@ -6,12 +6,13 @@
 
 package hangman.client.view;
 
-import hangman.client.Category;
-import hangman.client.Game;
-import hangman.client.Player;
-import hangman.client.Status;
+import com.pl.msarelo.wi.hangman.server.Category;
+import com.pl.msarelo.wi.hangman.server.Game;
+import com.pl.msarelo.wi.hangman.server.Player;
+import com.pl.msarelo.wi.hangman.server.Status;
 import hangman.client.gameManager.GMException;
 import hangman.client.gameManager.LocalGameManager;
+import hangman.client.gameManager.PlayerInfo;
 import hangman.client.view.enums.CreateGameEnum;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
@@ -89,10 +90,10 @@ public class View {
     public Game prepareGameData() throws ExitException, GoBackException {
         Menu menu = Menu.createFromEnum(Category.values());
         Category category = (Category) this.getUserResponse(menu, true, true, true);
-        String gameWord = this.getUserInput("Podaj slowo do zgadniecia", true);
+//        String gameWord = this.getUserInput("Podaj slowo do zgadniecia", true);
         Game game = new Game();
         game.setCategory(category);
-        game.setWord(gameWord);
+//        game.setWord(gameWord);
         return game;
     }
 
@@ -245,20 +246,20 @@ public class View {
         System.out.println(text);
     }
 
-    public int getGameStep(Game ongoingGame, List<Player> players) throws ExitException {
+    public int getGameStep(Game ongoingGame, List<PlayerInfo> players) throws ExitException {
         GamePrinter.getInstance().printGame(
                 ongoingGame,
                 players,
-                LocalGameManager.getInstance().getAdmin(ongoingGame, players).getId(),
+                ongoingGame.getAdmin().getId(),
                 LocalGameManager.getInstance().getActivePlayer(ongoingGame, players).getId()
         );
         return this.getUserInteractionOrSleep(ongoingGame, players);
     }
 
-    public int adminStartGame(Game game, List<Player> players) {
+    public int adminStartGame(Game game, List<PlayerInfo> players) {
         GamePrinter.getInstance().printPlayerList(
                 players,
-                LocalGameManager.getInstance().getAdmin(game, players).getId(),
+                game.getAdmin().getId(),
                 LocalGameManager.getInstance().getActivePlayer(game, players).getId()
         );
         List<String> options = new ArrayList<>();
@@ -274,7 +275,7 @@ public class View {
         return 2;
     }
 
-    private int getUserInteractionOrSleep(Game ongoingGame, List<Player> players) throws ExitException {
+    private int getUserInteractionOrSleep(Game ongoingGame, List<PlayerInfo> players) throws ExitException {
         LocalGameManager gameManager = LocalGameManager.getInstance();
         Player activePlayer = gameManager.getActivePlayer(ongoingGame, players);
         try {
@@ -295,11 +296,11 @@ public class View {
         return 0;
     }
 
-    public void waitForStart(Game game, List<Player> players) {
+    public void waitForStart(Game game, List<PlayerInfo> players) {
         this.clearOutput();
         GamePrinter.getInstance().printPlayerList(
                 players,
-                LocalGameManager.getInstance().getAdmin(game, players).getId(),
+                game.getAdmin().getId(),
                 LocalGameManager.getInstance().getActivePlayer(game, players).getId()
         );
         this.printLine("Oczekiwanie na start...");

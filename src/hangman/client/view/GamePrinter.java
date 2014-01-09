@@ -6,9 +6,10 @@
 
 package hangman.client.view;
 
-import hangman.client.Game;
-import hangman.client.Player;
+import com.pl.msarelo.wi.hangman.server.Game;
+import com.pl.msarelo.wi.hangman.server.Player;
 import hangman.client.gameManager.LocalGameManager;
+import hangman.client.gameManager.PlayerInfo;
 import java.util.List;
 
 /**
@@ -27,7 +28,7 @@ public class GamePrinter extends View {
         return GamePrinter.intance;
     }
 
-    public void printPlayerList(List<Player> players, Long adminId, Long activePlayerId) {
+    public void printPlayerList(List<PlayerInfo> players, Long adminId, Long activePlayerId) {
         this.clearOutput();
         this.printLine("Lista graczy");
         
@@ -44,7 +45,7 @@ public class GamePrinter extends View {
         }
     }
 
-    void printGame(Game ongoingGame, List<Player> players, Long adminId, Long activePlayerId) {
+    void printGame(Game ongoingGame, List<PlayerInfo> players, Long adminId, Long activePlayerId) {
         this.printPlayerList(players, adminId, activePlayerId);
         this.printGameProgress(LocalGameManager.getInstance().getFailureAttempts(ongoingGame, activePlayerId));
         this.printWordProgress();
@@ -109,7 +110,16 @@ public class GamePrinter extends View {
         }
     }
 
-    private void printWordProgress() {
-//
+    private void printWordProgress(Game game) {
+        String wordString = new String("");
+        LocalGameManager gameManager = LocalGameManager.getInstance();
+        for (int i=0; i<game.getWord().length(); i++) {
+            if (gameManager.letterWasUsed(game.getWord().charAt(i))) {
+                wordString += game.getWord().charAt(i);
+            } else {
+                wordString += "_";
+            }
+        }
+        this.printLine(wordString);
     }
 }

@@ -12,9 +12,17 @@
 
 <xs:element name="createGameResponse" type="tns:createGameResponse"></xs:element>
 
+<xs:element name="createGameWithWord" type="tns:createGameWithWord"></xs:element>
+
+<xs:element name="createGameWithWordResponse" type="tns:createGameWithWordResponse"></xs:element>
+
 <xs:element name="createPlayer" type="tns:createPlayer"></xs:element>
 
 <xs:element name="createPlayerResponse" type="tns:createPlayerResponse"></xs:element>
+
+<xs:element name="getGameAdmin" type="tns:getGameAdmin"></xs:element>
+
+<xs:element name="getGameAdminResponse" type="tns:getGameAdminResponse"></xs:element>
 
 <xs:element name="getGameById" type="tns:getGameById"></xs:element>
 
@@ -28,6 +36,10 @@
 
 <xs:element name="getPlayerByIdResponse" type="tns:getPlayerByIdResponse"></xs:element>
 
+<xs:element name="getPlayerByName" type="tns:getPlayerByName"></xs:element>
+
+<xs:element name="getPlayerByNameResponse" type="tns:getPlayerByNameResponse"></xs:element>
+
 <xs:element name="getPlayerList" type="tns:getPlayerList"></xs:element>
 
 <xs:element name="getPlayerListResponse" type="tns:getPlayerListResponse"></xs:element>
@@ -35,6 +47,37 @@
 <xs:element name="getPlayersAssignedToGame" type="tns:getPlayersAssignedToGame"></xs:element>
 
 <xs:element name="getPlayersAssignedToGameResponse" type="tns:getPlayersAssignedToGameResponse"></xs:element>
+
+<xs:element name="startGame" type="tns:startGame"></xs:element>
+
+<xs:element name="startGameResponse" type="tns:startGameResponse"></xs:element>
+
+<xs:complexType name="getPlayerById">
+<xs:sequence>
+<xs:element name="id" type="xs:long" minOccurs="0"></xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="getPlayerByIdResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:Player" minOccurs="0"></xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="Player">
+<xs:complexContent>
+<xs:extension base="tns:abstractEntity">
+<xs:sequence>
+<xs:element name="name" type="xs:string" minOccurs="0"></xs:element>
+</xs:sequence>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+
+<xs:complexType name="abstractEntity" abstract="true">
+<xs:sequence></xs:sequence>
+<xs:attribute name="id" type="xs:long"></xs:attribute>
+</xs:complexType>
 
 <xs:complexType name="getGameList">
 <xs:sequence></xs:sequence>
@@ -50,6 +93,7 @@
 <xs:complexContent>
 <xs:extension base="tns:abstractEntity">
 <xs:sequence>
+<xs:element name="admin" type="tns:Player" minOccurs="0"></xs:element>
 <xs:element name="category" type="tns:category" minOccurs="0"></xs:element>
 <xs:element name="gameResult" type="tns:gameResult" minOccurs="0"></xs:element>
 <xs:element name="status" type="tns:status" minOccurs="0"></xs:element>
@@ -57,11 +101,6 @@
 </xs:sequence>
 </xs:extension>
 </xs:complexContent>
-</xs:complexType>
-
-<xs:complexType name="abstractEntity" abstract="true">
-<xs:sequence></xs:sequence>
-<xs:attribute name="id" type="xs:long"></xs:attribute>
 </xs:complexType>
 
 <xs:complexType name="gameResult">
@@ -102,26 +141,17 @@
 </xs:complexContent>
 </xs:complexType>
 
-<xs:complexType name="getPlayerById">
+<xs:complexType name="startGame">
 <xs:sequence>
-<xs:element name="id" type="xs:long" minOccurs="0"></xs:element>
+<xs:element name="gameId" type="xs:long" minOccurs="0"></xs:element>
+<xs:element name="playerId" type="xs:long" minOccurs="0"></xs:element>
 </xs:sequence>
 </xs:complexType>
 
-<xs:complexType name="getPlayerByIdResponse">
+<xs:complexType name="startGameResponse">
 <xs:sequence>
-<xs:element name="return" type="tns:Player" minOccurs="0"></xs:element>
+<xs:element name="return" type="tns:Game" minOccurs="0"></xs:element>
 </xs:sequence>
-</xs:complexType>
-
-<xs:complexType name="Player">
-<xs:complexContent>
-<xs:extension base="tns:abstractEntity">
-<xs:sequence>
-<xs:element name="name" type="xs:string" minOccurs="0"></xs:element>
-</xs:sequence>
-</xs:extension>
-</xs:complexContent>
 </xs:complexType>
 
 <xs:complexType name="getPlayerList">
@@ -134,16 +164,40 @@
 </xs:sequence>
 </xs:complexType>
 
+<xs:complexType name="getPlayerByName">
+<xs:sequence>
+<xs:element name="name" type="xs:string" minOccurs="0"></xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="getPlayerByNameResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:Player" minOccurs="0"></xs:element>
+</xs:sequence>
+</xs:complexType>
+
 <xs:complexType name="createGame">
 <xs:sequence>
 <xs:element name="category" type="tns:category" minOccurs="0"></xs:element>
-<xs:element name="word" type="xs:string" minOccurs="0"></xs:element>
+<xs:element name="playerId" type="xs:long" minOccurs="0"></xs:element>
 </xs:sequence>
 </xs:complexType>
 
 <xs:complexType name="createGameResponse">
 <xs:sequence>
-<xs:element name="return" type="xs:string" minOccurs="0"></xs:element>
+<xs:element name="return" type="tns:Game" minOccurs="0"></xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="getGameAdmin">
+<xs:sequence>
+<xs:element name="gameId" type="xs:long" minOccurs="0"></xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="getGameAdminResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:Player" minOccurs="0"></xs:element>
 </xs:sequence>
 </xs:complexType>
 
@@ -155,20 +209,6 @@
 </xs:complexType>
 
 <xs:complexType name="addPlayerToGameResponse">
-<xs:sequence>
-<xs:element name="return" type="tns:Game" minOccurs="0"></xs:element>
-</xs:sequence>
-</xs:complexType>
-
-<xs:complexType name="checkLetter">
-<xs:sequence>
-<xs:element name="gameId" type="xs:long" minOccurs="0"></xs:element>
-<xs:element name="playerId" type="xs:long" minOccurs="0"></xs:element>
-<xs:element name="letter" type="xs:string" minOccurs="0"></xs:element>
-</xs:sequence>
-</xs:complexType>
-
-<xs:complexType name="checkLetterResponse">
 <xs:sequence>
 <xs:element name="return" type="tns:Game" minOccurs="0"></xs:element>
 </xs:sequence>
@@ -186,6 +226,20 @@
 </xs:sequence>
 </xs:complexType>
 
+<xs:complexType name="checkLetter">
+<xs:sequence>
+<xs:element name="gameId" type="xs:long" minOccurs="0"></xs:element>
+<xs:element name="playerId" type="xs:long" minOccurs="0"></xs:element>
+<xs:element name="letter" type="xs:string" minOccurs="0"></xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="checkLetterResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:Game" minOccurs="0"></xs:element>
+</xs:sequence>
+</xs:complexType>
+
 <xs:complexType name="createPlayer">
 <xs:sequence>
 <xs:element name="name" type="xs:string" minOccurs="0"></xs:element>
@@ -195,6 +249,20 @@
 <xs:complexType name="createPlayerResponse">
 <xs:sequence>
 <xs:element name="return" type="xs:long" minOccurs="0"></xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="createGameWithWord">
+<xs:sequence>
+<xs:element name="category" type="tns:category" minOccurs="0"></xs:element>
+<xs:element name="word" type="xs:string" minOccurs="0"></xs:element>
+<xs:element name="playerId" type="xs:long" minOccurs="0"></xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="createGameWithWordResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:Game" minOccurs="0"></xs:element>
 </xs:sequence>
 </xs:complexType>
 

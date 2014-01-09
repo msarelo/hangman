@@ -6,11 +6,10 @@
 
 package hangman.client.gameManager;
 
-import hangman.client.Game;
-import hangman.client.GameResult;
-import hangman.client.GameResult.PlayerCountOfAttempt.Entry;
-import hangman.client.Player;
-import hangman.client.Status;
+import com.pl.msarelo.wi.hangman.server.Game;
+import com.pl.msarelo.wi.hangman.server.GameResult;
+import com.pl.msarelo.wi.hangman.server.Player;
+import com.pl.msarelo.wi.hangman.server.Status;
 import hangman.client.view.ExitException;
 import hangman.client.view.GoBackException;
 import hangman.client.view.SpecialEnum;
@@ -35,6 +34,8 @@ public class LocalGameManager {
     private WSClient wsClient;
     private View view;
     private boolean gameCreatedLocally;
+
+    public static final int MAX_ATTEMPTS = 9;
     
     private LocalGameManager() {
         this.localPlayers = new ArrayList<>();
@@ -134,13 +135,14 @@ public class LocalGameManager {
 
     public void playGame(Game game) throws ExitException {
         Game ongoingGame;
-        List<Player> players;
+        List<PlayerInfo> players;
         do {
             ongoingGame = this.wsClient.getGameStatus(game.getId());
-            players = this.wsClient.getPlayers(game.getId());
+            players = this.getPlayerInfo(game, this.wsClient.getPlayers(game.getId()));
+
             if (ongoingGame.getStatus() == Status.PREPARAE && this.gameHasLocalAdmin(ongoingGame)) {
                 if (1 == this.view.adminStartGame(ongoingGame, players)) {
-                    Game gameStarted = this.startGame(game, this.getAdmin(ongoingGame, players).getId());
+                    Game gameStarted = this.startGame(game);
                     if (gameStarted.getStatus() != Status.ONGOING) {
                         this.view.cannotJoinToGame();
                     }
@@ -155,11 +157,11 @@ public class LocalGameManager {
     }
 
     public boolean gameHasLocalAdmin(Game ongoingGame) {
-        return (this.getLocalPlayersIds().contains(this.getFirstPlayer(ongoingGame)));
+        return (this.getLocalPlayersIds().contains(ongoingGame.getAdmin().getId()));
     }
 
-    private Game startGame(Game game, Long adminId) {
-        return this.wsClient.startGame(game, adminId);
+    private Game startGame(Game game) {
+        return this.wsClient.startGame(game);
     }
 
     private List<Long> getLocalPlayersIds() {
@@ -178,29 +180,14 @@ public class LocalGameManager {
         return game.getGameResult().getPlayerCountOfAttempt().getEntry().get(0).getKey();
     }
 
-    public Player getAdmin(Game game, List<Player> players) {
-        Long adminId = this.getFirstPlayer(game);
-        return this.getPlayerById(adminId, players);
-    }
-
-    public Player getActivePlayer(Game game, List<Player> players) {
-        List<Entry> attempts = game.getGameResult().getPlayerCountOfAttempt().getEntry();
-        int attemptCount = attempts.get(0).getValue();
-        for (Entry attempt : attempts) {
-            if (attempt.getValue() < attemptCount) {
-                return this.getPlayerById(attempt.getKey(), players);
-            }
-        }
-        return this.getPlayerById(attempts.get(0).getKey(), players);
-    }
-
-    private Player getPlayerById(Long playerId, List<Player> players) {
-        for (Player player : players) {
-            if (player.getId().equals(playerId)) {
+    public PlayerInfo getActivePlayer(Game game, List<PlayerInfo> players) {
+        int attemptCount = players.get(0).getAttempts();
+        for (PlayerInfo player : players) {
+            if (player.getAttempts()< attemptCount) {
                 return player;
             }
         }
-        return null;
+        return players.get(0);
     }
 
     public boolean isLocalGame() {
@@ -215,5 +202,27 @@ public class LocalGameManager {
             }
         }
         return 0;
+    }
+
+    public int getAttempts(Game game, Long playerId) {
+        List<GameResult.PlayerCountOfAttempt.Entry> attempts = game.getGameResult().getPlayerCountOfAttempt().getEntry();
+        for (GameResult.PlayerCountOfAttempt.Entry attempt : attempts) {
+            if (attempt.getKey().equals(playerId)) {
+                return attempt.getValue();
+            }
+        }
+        return 0;
+    }
+
+    private List<PlayerInfo> getPlayerInfo(Game game, List<Player> players) {
+        List<PlayerInfo> playersInfo = new ArrayList<>();
+        for (Player player : players) {
+            playersInfo.add(new PlayerInfo(player, this.getAttempts(game, player.getId()), this.getFailureAttempts(game, player.getId())));
+        }
+        return playersInfo;
+    }
+
+    public boolean letterWasUsed(char charAt) {
+        return (Math.round((float)Math.random()) == 1);
     }
 }

@@ -6,6 +6,7 @@
 
 package hangman.client;
 
+import com.pl.msarelo.wi.hangman.server.Game;
 import hangman.client.gameManager.GMException;
 import hangman.client.gameManager.LocalGameManager;
 import hangman.client.view.ExitException;

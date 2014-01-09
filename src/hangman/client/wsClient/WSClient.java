@@ -6,8 +6,8 @@
 
 package hangman.client.wsClient;
 
-import hangman.client.Game;
-import hangman.client.Player;
+import com.pl.msarelo.wi.hangman.server.Game;
+import com.pl.msarelo.wi.hangman.server.Player;
 import java.util.List;
 
 /**
@@ -15,13 +15,13 @@ import java.util.List;
  * @author Deathek
  */
 public class WSClient {
-    hangman.client.GameManagerService service;
-    hangman.client.GameManager port;
+    com.pl.msarelo.wi.hangman.server.GameManagerService service;
+    com.pl.msarelo.wi.hangman.server.GameManager port;
     
     private static WSClient instance;
     
     private WSClient() {
-        this.service = new hangman.client.GameManagerService();
+        this.service = new com.pl.msarelo.wi.hangman.server.GameManagerService();
         this.port = service.getGameManagerPort();
     }
     
@@ -48,7 +48,7 @@ public class WSClient {
     }
 
     public Game createGame(Game game, Player admin) {
-        return this.port.createGame(game.getCategory(), game.getWord(), admin.getId());
+        return this.port.createGame(game.getCategory(), admin.getId());
     }
 
     public boolean joinGame(Game game, List<Player> localPlayers) {
@@ -62,8 +62,8 @@ public class WSClient {
         return this.port.getGameById(gameId);
     }
 
-    public Game startGame(Game game, Long adminId) {
-        return this.port.startGame(game.getId(), adminId);
+    public Game startGame(Game game) {
+        return this.port.startGame(game.getId(), game.getAdmin().getId());
     }
 
     public List<Player> getPlayers(Long id) {
