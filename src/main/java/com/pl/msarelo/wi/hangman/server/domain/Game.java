@@ -83,7 +83,6 @@ public class Game extends AbstractEntity {
         this.gameResult = gameResult;
     }
 
-    @XmlTransient
     public List<Character> getUsedChars() {
         return usedChars;
     }
