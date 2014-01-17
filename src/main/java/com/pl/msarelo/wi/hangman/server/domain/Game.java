@@ -13,7 +13,6 @@ import javax.persistence.FetchType;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
-import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 /**
@@ -29,7 +28,7 @@ import javax.xml.bind.annotation.XmlType;
     )})
 public class Game extends AbstractEntity {
 
-    public static final int MAX_ATTEMPTS = 9;
+    public static final int MAX_ATTEMPTS = 12;
     public static final String PLAYER_LOSE = "Player lose";
 
     private String word;
@@ -40,6 +39,7 @@ public class Game extends AbstractEntity {
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private GameResult gameResult;
     private Player playerAdmin;
+    private Player winner;
 
     public Game() {
     }
@@ -100,7 +100,7 @@ public class Game extends AbstractEntity {
 
         nextAttempt(player);
 
-        Integer count = getGameResult().getPlayerCountOfFailure().get(player.getId());
+        int count = getGameResult().getPlayerCountOfFailure().get(player.getId());
 
         if (count >= MAX_ATTEMPTS) {
             result = PLAYER_LOSE;
@@ -114,11 +114,14 @@ public class Game extends AbstractEntity {
     }
 
     public String nextAttempt(Player player) {
+
         String result = null;
-        Integer count = getGameResult().getPlayerCountOfAttempt().get(player.getId());
+        int count = getGameResult().getPlayerCountOfAttempt().get(player.getId());
+        System.out.println("Player: " + player.getId() + " is checking another letter (" + Integer.toString(count) + ")");
         count++;
         getGameResult().getPlayerCountOfAttempt().put(player.getId(), count);
-        result = count.toString();
+        System.out.println("Player: " + player.getId() + " trys: " + Integer.toString(count));
+        result = Integer.toString(count);
 
         return result;
 
@@ -140,6 +143,14 @@ public class Game extends AbstractEntity {
 
     public void setAdmin(Player admin) {
         this.playerAdmin = admin;
+    }
+
+    public void setWinner(Player winner) {
+        this.winner = winner;
+    }
+
+    public Player getWinner() {
+        return this.winner;
     }
 
 }

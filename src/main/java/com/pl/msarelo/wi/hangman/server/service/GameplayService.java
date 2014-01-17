@@ -7,6 +7,7 @@ package com.pl.msarelo.wi.hangman.server.service;
 
 import com.pl.msarelo.wi.hangman.server.domain.Game;
 import com.pl.msarelo.wi.hangman.server.domain.Player;
+import java.util.List;
 
 /**
  *
@@ -32,8 +33,11 @@ public class GameplayService {
             String resultOfAttempt = "";
 
 //        if (game.getWord().length() > game.getGameResult().getPlayerCountOfFailure().get(player.getId()) && game.getWord().length() > game.getGameResult().getPlayerCountOfAttempt().get(player.getId())) {
+            System.out.println("checking letter: " + letter);
             if (!game.getUsedChars().contains(letter)) {
-                if (!word.contains(letter.toString())) {
+                System.out.println("letter not yet used");
+                if (!word.toLowerCase().contains(letter.toString().toLowerCase())) {
+                    System.out.println("but word does not contain it... really? word: " + word + " letter: " + letter + " toString: " + letter.toString());
                     resultOfAttempt = game.nextFailureAttempt(player);
                 } else {
                     resultOfAttempt = game.nextAttempt(player);
@@ -43,14 +47,12 @@ public class GameplayService {
                 resultOfAttempt = game.nextFailureAttempt(player);
             }
 
-            if (!resultOfAttempt.equals(game.PLAYER_LOSE) && !resultOfAttempt.equals("")) {
-                Integer positiveAttempts = Integer.valueOf(resultOfAttempt) - game.getGameResult().getPlayerCountOfFailure().get(player.getId());
-                System.out.println("positive:" + positiveAttempts);
-                if (positiveAttempts >= word.length()) {
+            if (!resultOfAttempt.equals(Game.PLAYER_LOSE) && !resultOfAttempt.equals("")) {
+                if (this.isWordGuessed(game)) {
                     game.setStatus(Game.Status.ENDED);
+                    game.setWinner(player);
                     System.out.println(Game.Status.ENDED);
                 }
-
             }
 //            }
 
@@ -78,5 +80,16 @@ public class GameplayService {
 
     public Player getAdmin(Long gameId) {
         return gameService.findById(gameId).getAdmin();
+    }
+
+    private boolean isWordGuessed(Game game) {
+        List<Character> characters = game.getUsedChars();
+        String word = game.getWord().toLowerCase();
+        System.out.println("checking word:" + word);
+        for (Character character : characters) {
+                word = word.replace("" + character, "");
+        }
+        System.out.println("checking word - letters removed:" + word);
+        return (word.length() == 0);
     }
 }
