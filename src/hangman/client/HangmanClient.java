@@ -47,7 +47,7 @@ public class HangmanClient {
                 GM.playGame(game);
             } while (View.getInstance().wannaPlayAgain());
         } catch (ExitException iWannaQuit) {
-            View.sayGoodBye();
+            View.getInstance().sayGoodBye();
         }
     }   
 }

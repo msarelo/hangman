@@ -27,8 +27,8 @@ import java.util.logging.Logger;
 public class View {
     private static View instance = null;
 
-    public static void sayGoodBye() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void sayGoodBye() {
+        this.printLine("Do zobaczenia wkrótce!");
     }
     protected View() {}
     
