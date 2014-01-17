@@ -35,7 +35,7 @@ public class LocalGameManager {
     private View view;
     private boolean gameCreatedLocally;
 
-    public static final int MAX_ATTEMPTS = 9;
+    public static final int MAX_ATTEMPTS = 12;
     
     private LocalGameManager() {
         this.localPlayers = new ArrayList<>();
@@ -46,7 +46,11 @@ public class LocalGameManager {
     }
     
     public static LocalGameManager getInstance() {
-        if (LocalGameManager.instance == null) {
+        return LocalGameManager.getInstance(false);
+    }
+
+    public static LocalGameManager getInstance(boolean recreate) {
+        if (LocalGameManager.instance == null || recreate) {
             LocalGameManager.instance = new LocalGameManager();
         }
         return LocalGameManager.instance;
@@ -117,7 +121,13 @@ public class LocalGameManager {
             if (this.gameCreatedLocally) {
                 if (this.getLocalPlayers().size() > 1) {
                     //for local game we need to remove Admin player which was already passed on game creation
-                    this.inGame = this.wsClient.joinGame(game, this.getLocalPlayers().subList(1, this.getLocalPlayers().size()-1));
+                    List<Player> playersToJoin = new ArrayList<>();
+                    for (Player player : this.getLocalPlayers()) {
+                        if (!player.getId().equals(game.getAdmin().getId())) {
+                            playersToJoin.add(player);
+                        }
+                    }
+                    this.inGame = this.wsClient.joinGame(game, playersToJoin);
                 } else {
                     //only one player which created the game - no need to add players
                     this.inGame = true;
@@ -138,7 +148,7 @@ public class LocalGameManager {
         List<PlayerInfo> players;
         do {
             ongoingGame = this.wsClient.getGameStatus(game.getId());
-            players = this.getPlayerInfo(game, this.wsClient.getPlayers(game.getId()));
+            players = this.getPlayerInfo(ongoingGame, this.wsClient.getPlayers(game.getId()));
 
             if (ongoingGame.getStatus() == Status.PREPARAE && this.gameHasLocalAdmin(ongoingGame)) {
                 if (1 == this.view.adminStartGame(ongoingGame, players)) {
@@ -148,12 +158,21 @@ public class LocalGameManager {
                     }
                 }
             } else if (ongoingGame.getStatus() == Status.PREPARAE) {
-                this.view.waitForStart(game, players);
+                this.view.waitForStart(ongoingGame, players);
             } else {
-                this.view.getGameStep(ongoingGame, players);
+                if (this.view.getGameStep(ongoingGame, players)) {
+                    String letter = this.view.getLetter();
+                    Game gameStatus = this.wsClient.checkLetter(ongoingGame.getId(), this.getActivePlayer(ongoingGame, players).getId(), letter);
+                    if (this.letterGuessed(ongoingGame, gameStatus, this.getActivePlayer(ongoingGame, players).getId())) {
+                        this.view.letterGuessed(ongoingGame, players);
+                    } else {
+                        this.view.letterNotGuessed(ongoingGame, players);
+                    }
+                    ongoingGame = gameStatus;
+                }
             }
         } while(ongoingGame.getStatus() != Status.ENDED);
-        //obsluga konca gry tutaj! tj wyswietlic statystyki slowo itp.
+        this.view.printGameResult(ongoingGame, players);
     }
 
     public boolean gameHasLocalAdmin(Game ongoingGame) {
@@ -183,7 +202,7 @@ public class LocalGameManager {
     public PlayerInfo getActivePlayer(Game game, List<PlayerInfo> players) {
         int attemptCount = players.get(0).getAttempts();
         for (PlayerInfo player : players) {
-            if (player.getAttempts()< attemptCount) {
+            if (player.getAttempts() < attemptCount) {
                 return player;
             }
         }
@@ -222,7 +241,17 @@ public class LocalGameManager {
         return playersInfo;
     }
 
-    public boolean letterWasUsed(char charAt) {
-        return (Math.round((float)Math.random()) == 1);
+    public boolean letterWasUsed(Game game, char charAt) {
+        return game.getUsedChars().contains((int)charAt);
+    }
+
+    public boolean localPlayerIsActive(Game ongoingGame, List<PlayerInfo> players) {
+        return this.getLocalPlayersIds().contains(this.getActivePlayer(ongoingGame, players).getId());
+    }
+
+    private boolean letterGuessed(Game previousGameStatus, Game actualGameStatus, Long activePlayerId) {
+        int previousFailureCount = this.getFailureAttempts(previousGameStatus, activePlayerId);
+        int actualFailureCount = this.getFailureAttempts(actualGameStatus, activePlayerId);
+        return (!(previousFailureCount < actualFailureCount));
     }
 }

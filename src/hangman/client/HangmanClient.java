@@ -21,8 +21,9 @@ public class HangmanClient {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        LocalGameManager GM = LocalGameManager.getInstance();
+        
         try {
+            LocalGameManager GM = LocalGameManager.getInstance(true);
             //getting local players
             do {
                 try {
@@ -44,7 +45,7 @@ public class HangmanClient {
                     }
                 } while (!GM.isInGame());
                 GM.playGame(game);
-            } while (View.wannaPlayAgain());
+            } while (View.getInstance().wannaPlayAgain());
         } catch (ExitException iWannaQuit) {
             View.sayGoodBye();
         }

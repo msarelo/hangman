@@ -10,7 +10,6 @@ import com.pl.msarelo.wi.hangman.server.Category;
 import com.pl.msarelo.wi.hangman.server.Game;
 import com.pl.msarelo.wi.hangman.server.Player;
 import com.pl.msarelo.wi.hangman.server.Status;
-import hangman.client.gameManager.GMException;
 import hangman.client.gameManager.LocalGameManager;
 import hangman.client.gameManager.PlayerInfo;
 import hangman.client.view.enums.CreateGameEnum;
@@ -77,8 +76,18 @@ public class View {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    public static boolean wannaPlayAgain() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public boolean wannaPlayAgain() throws ExitException {
+        this.printLine("Chcesz zagrać ponownie?");
+        List<String> options = new ArrayList<>();
+        options.add("Tak");
+        options.add("Nie");
+        int option = 0;
+        try {
+            option = this.getUserResponse(options, false, false, false);
+        } catch (GoBackException ex) {
+            Logger.getLogger(View.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return (option == 1);
     }
 
     public boolean joinGame() {
@@ -163,7 +172,7 @@ public class View {
             } catch (InputMismatchException stupidUserFault) {
                 choice = 0;
             }
-        } while (choice < 1 && choice > i);
+        } while (choice < 1 || choice > i);
 
         if (choice == exit) {
             throw new ExitException();
@@ -209,9 +218,10 @@ public class View {
             try {
                 choice = console.nextInt();
             } catch (InputMismatchException stupidUserFault) {
+                console = new Scanner(System.in);
                 choice = 0;
             }
-        } while (choice < 1 && choice > i);
+        } while (choice < 1 || choice > i);
 
         if (choice == exit) {
             throw new ExitException();
@@ -246,14 +256,14 @@ public class View {
         System.out.println(text);
     }
 
-    public int getGameStep(Game ongoingGame, List<PlayerInfo> players) throws ExitException {
+    public boolean getGameStep(Game ongoingGame, List<PlayerInfo> players) throws ExitException {
         GamePrinter.getInstance().printGame(
                 ongoingGame,
                 players,
                 ongoingGame.getAdmin().getId(),
                 LocalGameManager.getInstance().getActivePlayer(ongoingGame, players).getId()
         );
-        return this.getUserInteractionOrSleep(ongoingGame, players);
+        return this.localUserIsActive(ongoingGame, players);
     }
 
     public int adminStartGame(Game game, List<PlayerInfo> players) {
@@ -275,25 +285,17 @@ public class View {
         return 2;
     }
 
-    private int getUserInteractionOrSleep(Game ongoingGame, List<PlayerInfo> players) throws ExitException {
-        LocalGameManager gameManager = LocalGameManager.getInstance();
-        Player activePlayer = gameManager.getActivePlayer(ongoingGame, players);
-        try {
-            if (gameManager.getLocalPlayers().contains(activePlayer)) {
-                List<String> options = new ArrayList<>();
-                options.add("Zgadnij literkę");
-                options.add("Zgadnij słowo");
-                try {
-                    return this.getUserResponse(options, false, true, false);
-                } catch (GoBackException ex) {
-                    Logger.getLogger(View.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            } else {
+    private boolean localUserIsActive(Game ongoingGame, List<PlayerInfo> players) throws ExitException {
+        if (LocalGameManager.getInstance().localPlayerIsActive(ongoingGame, players)) {
+            return true;
+        } else {
+            try {
                 Thread.sleep(1000);
-                return 0;
+            } catch (InterruptedException ex) {
+                Logger.getLogger(View.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } catch (GMException | InterruptedException e){}
-        return 0;
+            return false;
+        }
     }
 
     public void waitForStart(Game game, List<PlayerInfo> players) {
@@ -318,5 +320,50 @@ public class View {
         } catch (InterruptedException ex) {
             Logger.getLogger(View.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    public String getLetter() {
+        String shouldBeSingleLetter;
+        do {
+            shouldBeSingleLetter = this.getUserInput("Podaj literkę", false);
+            if (shouldBeSingleLetter.length() > 1) {
+                this.printLine("Podaj JEDNĄ literkę");
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(View.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        } while(shouldBeSingleLetter.length() > 1);
+        return shouldBeSingleLetter;
+    }
+
+    public void letterGuessed(Game ongoingGame, List<PlayerInfo> players) {
+        this.printLine("Literka trafiona!");
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(View.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void letterNotGuessed(Game ongoingGame, List<PlayerInfo> players) {
+        this.printLine("Niestety, literka nie występuje w słowie albo została już wykorzystana.");
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(View.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void printGameResult(Game endedGame, List<PlayerInfo> players) {
+        Player winner = endedGame.getWinner();
+        if (winner != null) {
+            this.printLine("Wygrał gracz: " + winner.getName());
+        } else {
+            this.printLine("Koniec gry. Słowo nie zostało odgadnięte.");
+        }
+
+        this.printLine("Słowo: " + endedGame.getWord());
     }
 }

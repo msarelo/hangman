@@ -69,4 +69,8 @@ public class WSClient {
     public List<Player> getPlayers(Long id) {
         return this.port.getPlayersAssignedToGame(id);
     }
+
+    public Game checkLetter(Long gameId, Long playerId, String letter) {
+        return this.port.checkLetter(gameId, playerId, letter);
+    }
 }

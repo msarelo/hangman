@@ -34,10 +34,10 @@ public class GamePrinter extends View {
         
         for (Player player : players) {
             String playerLine = player.getName();
-            if (player.getId() == adminId) {
+            if (player.getId().equals(adminId)) {
                 playerLine += " (*)";
             }
-            if (player.getId() == activePlayerId) {
+            if (player.getId().equals(activePlayerId)) {
                 playerLine = "-> " + playerLine;
             }
 
@@ -45,10 +45,10 @@ public class GamePrinter extends View {
         }
     }
 
-    void printGame(Game ongoingGame, List<PlayerInfo> players, Long adminId, Long activePlayerId) {
+    public void printGame(Game ongoingGame, List<PlayerInfo> players, Long adminId, Long activePlayerId) {
         this.printPlayerList(players, adminId, activePlayerId);
         this.printGameProgress(LocalGameManager.getInstance().getFailureAttempts(ongoingGame, activePlayerId));
-        this.printWordProgress();
+        this.printWordProgress(ongoingGame);
     }
 
     private void printGameProgress(int failureAttempts) {
@@ -111,13 +111,16 @@ public class GamePrinter extends View {
     }
 
     private void printWordProgress(Game game) {
-        String wordString = new String("");
+        String wordString = "";
         LocalGameManager gameManager = LocalGameManager.getInstance();
         for (int i=0; i<game.getWord().length(); i++) {
-            if (gameManager.letterWasUsed(game.getWord().charAt(i))) {
+            if (gameManager.letterWasUsed(game, game.getWord().toLowerCase().charAt(i))) {
+                if (wordString.endsWith("_")) {
+                    wordString += " ";
+                }
                 wordString += game.getWord().charAt(i);
             } else {
-                wordString += "_";
+                wordString += " _";
             }
         }
         this.printLine(wordString);
